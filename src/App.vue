@@ -1,10 +1,25 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view />
+  <Header />
+  <main class="content container">
+    <router-view />
+  </main>
+  <Fotter />
 </template>
+
+<script lang="ts">
+// Vue
+import { defineComponent } from "vue";
+// Components
+import Header from "@/components/Header.vue";
+import Fotter from "@/components/Fotter.vue";
+
+export default defineComponent({
+  components: {
+    Header,
+    Fotter,
+  },
+});
+</script>
 
 <style lang="scss">
 #app {
