@@ -1,11 +1,20 @@
 <template>
   <li class="catalog__item">
     <a class="catalog__pic" href="#">
-      <img
-        class="catalog__image"
-        :src="product.colors[0].gallery[0].file.url"
-        alt="Название товара"
-      />
+      <router-link
+        :to="{
+          name: 'SeparateProductPage',
+          params: {
+            id: product.id,
+          },
+        }"
+      >
+        <img
+          class="catalog__image"
+          :src="product.colors[0].gallery[0].file.url"
+          alt="Название товара"
+        />
+      </router-link>
     </a>
 
     <h3 class="catalog__title">
@@ -52,7 +61,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    // console.log(props.product);
+    console.log(props.product);
   },
 });
 </script>

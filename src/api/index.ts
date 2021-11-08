@@ -45,3 +45,11 @@ export const getProductsList = async (
   });
   return productList.data;
 };
+
+export const getProductInfo = async (id: number) => {
+  const product = await instance({
+    url: `/products/${id}`,
+  });
+
+  return product.data;
+};

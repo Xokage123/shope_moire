@@ -1,7 +1,14 @@
 <template>
   <header class="header container">
     <div class="header__wrapper">
-      <span class="header__info">Каталог</span>
+      <span class="header__info">
+        <router-link
+          :to="{
+            name: 'ProductsPage',
+          }"
+          >Каталог
+        </router-link>
+      </span>
 
       <a class="header__logo" href="#">
         <img
