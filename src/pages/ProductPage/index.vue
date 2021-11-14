@@ -21,14 +21,14 @@
 
 <script lang="ts">
 // Vue
-import { defineComponent, onMounted, ref, watch } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import { useStore } from "vuex";
 // Components
 import FilterComponent from "./components/Filter.vue";
 import ProductsList from "./components/ProductsList.vue";
 import PaginationList from "./components/PaginationList.vue";
-// Interface
-import type { State } from "@/store/index";
+// Types
+import { IProductsStore } from "@/store/modules/Products/types";
 
 export default defineComponent({
   name: "ProductsPage",
@@ -38,24 +38,24 @@ export default defineComponent({
     PaginationList,
   },
   setup() {
-    const $store = useStore<State>();
+    const $storeProduct = useStore<IProductsStore>();
     // Изначально у нас открыта первая страница
     let numberPage = ref<number>(1);
 
     let listProduct = ref([]);
 
-    onMounted(() => {
-      $store.dispatch("loadListProduct", numberPage.value).then((products) => {
+    $storeProduct
+      .dispatch("loadListProduct", numberPage.value)
+      .then((products) => {
         listProduct.value = products.items;
       });
-    });
 
     watch(
       () => numberPage.value,
       (newNumberPage, oldNumberPage) => {
         console.log(newNumberPage);
         console.log(oldNumberPage);
-        $store
+        $storeProduct
           .dispatch("loadListProduct", {
             numberPage: newNumberPage,
           })
@@ -66,7 +66,7 @@ export default defineComponent({
     );
 
     return {
-      totalProducts: $store.state.productsInformation.totalProducts,
+      totalProducts: $storeProduct.state.totalProducts,
       listProduct,
     };
   },

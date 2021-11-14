@@ -49,16 +49,14 @@
 import { defineComponent, watch } from "vue";
 import { useStore } from "vuex";
 // Interface
-import type { State } from "@/store/index";
+import type { IRootStore } from "@/store/types";
+
 export default defineComponent({
   setup() {
-    const $store = useStore<State>();
-    console.log($store.state.productsInformation);
-
-    // const arrayPaginationItems = re
+    const $storeProducts = useStore<IRootStore>();
 
     watch(
-      () => $store.state.productsInformation,
+      () => $storeProducts.state.products.listProducts,
       (value) => {
         console.log(value);
       }

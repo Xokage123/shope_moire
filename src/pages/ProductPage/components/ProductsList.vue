@@ -13,6 +13,7 @@
 import { defineComponent, ref, watch } from "vue";
 // Elements
 import ProductItem from "@/pages/ProductPage/components/ProductItem.vue";
+
 export default defineComponent({
   props: {
     products: {

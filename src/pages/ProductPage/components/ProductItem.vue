@@ -54,14 +54,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+
 export default defineComponent({
   props: {
     product: {
       type: Object,
     },
-  },
-  setup(props) {
-    console.log(props.product);
   },
 });
 </script>
