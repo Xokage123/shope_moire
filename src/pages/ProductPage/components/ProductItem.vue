@@ -10,6 +10,7 @@
         }"
       >
         <img
+          v-if="product.colors[0].gallery"
           class="catalog__image"
           :src="product.colors[0].gallery[0].file.url"
           alt="Название товара"
@@ -60,6 +61,9 @@ export default defineComponent({
     product: {
       type: Object,
     },
+  },
+  setup(props) {
+    // console.log(props.product);
   },
 });
 </script>

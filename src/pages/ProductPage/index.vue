@@ -28,7 +28,7 @@ import FilterComponent from "./components/Filter.vue";
 import ProductsList from "./components/ProductsList.vue";
 import PaginationList from "./components/PaginationList.vue";
 // Types
-import { IProductsStore } from "@/store/modules/Products/types";
+import { IRootStore } from "@/store/types";
 
 export default defineComponent({
   name: "ProductsPage",
@@ -38,25 +38,23 @@ export default defineComponent({
     PaginationList,
   },
   setup() {
-    const $storeProduct = useStore<IProductsStore>();
+    const $store = useStore<IRootStore>();
     // Изначально у нас открыта первая страница
     let numberPage = ref<number>(1);
 
-    let listProduct = ref([]);
+    const listProduct = ref<Array<unknown>>([]);
 
-    $storeProduct
-      .dispatch("loadListProduct", numberPage.value)
+    $store
+      .dispatch("products/loadListProduct", numberPage.value)
       .then((products) => {
         listProduct.value = products.items;
       });
 
     watch(
       () => numberPage.value,
-      (newNumberPage, oldNumberPage) => {
-        console.log(newNumberPage);
-        console.log(oldNumberPage);
-        $storeProduct
-          .dispatch("loadListProduct", {
+      (newNumberPage) => {
+        $store
+          .dispatch("products/loadListProduct", {
             numberPage: newNumberPage,
           })
           .then((products) => {
@@ -65,8 +63,15 @@ export default defineComponent({
       }
     );
 
+    watch(
+      () => $store.state.products.listProducts,
+      () => {
+        listProduct.value = $store.state.products.listProducts;
+      }
+    );
+
     return {
-      totalProducts: $storeProduct.state.totalProducts,
+      totalProducts: $store.state.products.totalProducts,
       listProduct,
     };
   },

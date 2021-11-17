@@ -12,7 +12,10 @@ const state: IProductsStore = {
   actualNumberPage: 0,
 };
 
+const namespaced = true;
+
 const products: Module<IProductsStore, IRootStore> = {
+  namespaced,
   state,
   actions: actionsProducts,
 };

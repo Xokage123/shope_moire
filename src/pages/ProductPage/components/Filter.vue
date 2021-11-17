@@ -201,7 +201,6 @@ export default defineComponent({
       if (!$store.state.filters.colorsList.length) {
         // Получаем актуальные цвета
         $store.dispatch("filters/loadColors").then((сolors) => {
-          console.log(сolors);
           colorsList.value = сolors;
         });
       }

@@ -32,7 +32,7 @@
             alt="Название товара"
           />
         </div>
-        <ul class="pics__list">
+        <ul v-if="productInfo.colors[0].gallery" class="pics__list">
           <li class="pics__item">
             <a href="" class="pics__link pics__link--current">
               <img
@@ -59,78 +59,63 @@
       </div>
 
       <div class="item__info">
-        <span class="item__code">Артикул: 150030</span>
-        <h2 class="item__title">Смартфон Xiaomi Mi Mix 3 6/128GB</h2>
+        <span class="item__code">Артикул: {{ productInfo.id }}</span>
+        <h2 class="item__title">{{ productInfo.title }}</h2>
         <div class="item__form">
-          <form class="form" action="#" method="POST">
+          <form class="form" @submit="addToOrder">
             <div class="item__row item__row--center">
               <div class="form__counter">
-                <button type="button" aria-label="Убрать один товар">
+                <button
+                  @click="removeOneGood"
+                  type="button"
+                  aria-label="Убрать один товар"
+                >
                   <svg width="12" height="12" fill="currentColor">
                     <use xlink:href="#icon-minus"></use>
                   </svg>
                 </button>
 
-                <input type="text" value="1" name="count" />
+                <input v-model="quantityOfGood" type="number" name="count" />
 
-                <button type="button" aria-label="Добавить один товар">
+                <button
+                  @click="addOneGood"
+                  type="button"
+                  aria-label="Добавить один товар"
+                >
                   <svg width="12" height="12" fill="currentColor">
                     <use xlink:href="#icon-plus"></use>
                   </svg>
                 </button>
               </div>
 
-              <b class="item__price"> 18 990 ₽ </b>
+              <b class="item__price"> {{ productInfo.price }} ₽ </b>
             </div>
 
             <div class="item__row">
               <fieldset class="form__block">
                 <legend class="form__legend">Цвет</legend>
                 <ul class="colors colors--black">
-                  <li class="colors__item">
+                  <li
+                    :key="color.color.id"
+                    :color="color"
+                    v-for="color in productInfo.colors"
+                    class="colors__item"
+                  >
                     <label class="colors__label">
                       <input
                         class="colors__radio sr-only"
                         type="radio"
                         name="color-item"
-                        value="blue"
-                        checked=""
+                        :value="color.color.title"
                       />
                       <span
                         class="colors__value"
-                        style="background-color: #73b6ea"
+                        :style="{
+                          backgroundColor: color.color.code,
+                        }"
                       >
                       </span>
                     </label>
-                  </li>
-                  <li class="colors__item">
-                    <label class="colors__label">
-                      <input
-                        class="colors__radio sr-only"
-                        type="radio"
-                        name="color-item"
-                        value="yellow"
-                      />
-                      <span
-                        class="colors__value"
-                        style="background-color: #ffbe15"
-                      >
-                      </span>
-                    </label>
-                  </li>
-                  <li class="colors__item">
-                    <label class="colors__label">
-                      <input
-                        class="colors__radio sr-only"
-                        type="radio"
-                        name="color-item"
-                        value="gray" />
-                      <span
-                        class="colors__value"
-                        style="background-color: #939393"
-                      >
-                      </span
-                    ></label>
                   </li>
                 </ul>
               </fieldset>
@@ -140,10 +125,20 @@
                 <label
                   class="form__label form__label--small form__label--select"
                 >
-                  <select class="form__select" type="text" name="category">
-                    <option value="value1">37-39</option>
-                    <option value="value2">40-42</option>
-                    <option value="value3">42-50</option>
+                  <select
+                    @change="toggleSize"
+                    class="form__select"
+                    type="text"
+                    name="category"
+                  >
+                    <option
+                      :key="size.id"
+                      :size="size.title"
+                      v-for="size in productInfo.sizes"
+                      :value="size.title"
+                    >
+                      {{ size.title }}
+                    </option>
                   </select>
                 </label>
               </fieldset>
@@ -200,7 +195,33 @@ import { getProductInfo } from "@/api/index";
 export default defineComponent({
   setup() {
     const $route = useRoute();
+
     let productInfo = ref(null);
+
+    const sizeUser = ref<string | null>(null);
+
+    const quantityOfGood = ref<number>(0);
+
+    const toggleSize = (ev: any) => {
+      sizeUser.value === ev.target.value;
+    };
+
+    const removeOneGood = () => {
+      if (quantityOfGood.value > 0) {
+        quantityOfGood.value = quantityOfGood.value - 1;
+      }
+    };
+
+    const addOneGood = () => {
+      quantityOfGood.value = quantityOfGood.value + 1;
+    };
+
+    const addToOrder = () => {
+      if (sizeUser.value) {
+        console.log("Еуые");
+      }
+    };
+
     getProductInfo(Number($route.params.id)).then((product) => {
       console.log(product);
       productInfo.value = product;
@@ -208,6 +229,12 @@ export default defineComponent({
 
     return {
       productInfo,
+      quantityOfGood,
+
+      toggleSize,
+      addToOrder,
+      removeOneGood,
+      addOneGood,
     };
   },
 });

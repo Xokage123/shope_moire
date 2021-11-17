@@ -1,11 +1,12 @@
 <template>
-  <ul class="catalog__list">
+  <ul v-if="products.length" class="catalog__list">
     <ProductItem
       :key="product.id"
       :product="product"
       v-for="product in actualListProducts"
     />
   </ul>
+  <div v-else>Загрузка...</div>
 </template>
 
 <script lang="ts">
@@ -25,6 +26,7 @@ export default defineComponent({
   },
   setup(props) {
     let actualListProducts = ref(props.products);
+
     watch(
       () => props.products,
       (newList) => {

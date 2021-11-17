@@ -1,52 +1,57 @@
 <template>
   <ul class="catalog__pagination pagination">
     <li class="pagination__item">
-      <a
-        class="
-          pagination__link pagination__link--arrow pagination__link--disabled
-        "
+      <button
+        :disabled="actualPageNumber == 1"
+        @click="goToPrevPage"
+        class="pagination__link pagination__link--arrow"
+        :class="{
+          'pagination__link--disabled': actualPageNumber == 1,
+        }"
         aria-label="Предыдущая страница"
       >
         <svg width="8" height="14" fill="currentColor">
           <use xlink:href="#icon-arrow-left"></use>
         </svg>
+      </button>
+    </li>
+    <li
+      :key="numberPage"
+      :numberPage="numberPage"
+      v-for="numberPage in paginationItems"
+      class="pagination__item"
+    >
+      <a
+        class="pagination__link"
+        :class="{
+          'pagination__link--current': actualPageNumber == numberPage,
+        }"
+        @click.prevent="toggleNumberPage(numberPage)"
+      >
+        {{ numberPage }}
       </a>
     </li>
     <li class="pagination__item">
-      <a class="pagination__link pagination__link--current"> 1 </a>
-    </li>
-    <li class="pagination__item">
-      <a class="pagination__link" href="#"> 2 </a>
-    </li>
-    <li class="pagination__item">
-      <a class="pagination__link" href="#"> 3 </a>
-    </li>
-    <li class="pagination__item">
-      <a class="pagination__link" href="#"> 4 </a>
-    </li>
-    <li class="pagination__item">
-      <a class="pagination__link" href="#"> ... </a>
-    </li>
-    <li class="pagination__item">
-      <a class="pagination__link" href="#"> 10 </a>
-    </li>
-    <li class="pagination__item">
-      <a
+      <button
+        :disabled="totalPage === actualPageNumber"
+        @click="goToNextPage"
         class="pagination__link pagination__link--arrow"
-        href="#"
+        :class="{
+          'pagination__link--disabled': totalPage === actualPageNumber,
+        }"
         aria-label="Следующая страница"
       >
         <svg width="8" height="14" fill="currentColor">
           <use xlink:href="#icon-arrow-right"></use>
         </svg>
-      </a>
+      </button>
     </li>
   </ul>
 </template>
 
 <script lang="ts">
 // Vue
-import { defineComponent, watch } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
 import { useStore } from "vuex";
 // Interface
 import type { IRootStore } from "@/store/types";
@@ -55,12 +60,60 @@ export default defineComponent({
   setup() {
     const $storeProducts = useStore<IRootStore>();
 
+    const actualPageNumber = ref(
+      $storeProducts.state.products.actualNumberPage
+    );
+
+    const totalPage = ref($storeProducts.state.products.totalNumberPage);
+
+    const goToPrevPage = () => {
+      toggleNumberPage(actualPageNumber.value - 1);
+    };
+
+    const goToNextPage = () => {
+      toggleNumberPage(actualPageNumber.value + 1);
+    };
+
+    const toggleNumberPage = (numberPage: number) => {
+      $storeProducts
+        .dispatch("products/loadListProduct", {
+          numberPage,
+          filtersObject: {},
+        })
+        .then((res) => {
+          actualPageNumber.value = res.pagination.page;
+          totalPage.value = res.pagination.pages;
+        });
+    };
+
+    const paginationItems = computed(() => {
+      const array: Array<number> = [];
+      for (
+        let numberPage = 1;
+        numberPage <= $storeProducts.state.products.totalNumberPage;
+        numberPage++
+      ) {
+        array.push(numberPage);
+      }
+      return array;
+    });
+
     watch(
-      () => $storeProducts.state.products.listProducts,
-      (value) => {
-        console.log(value);
+      () => $storeProducts.state.products.totalNumberPage,
+      (newValue) => {
+        totalPage.value = newValue;
       }
     );
+
+    return {
+      paginationItems,
+      actualPageNumber,
+      totalPage,
+
+      toggleNumberPage,
+      goToPrevPage,
+      goToNextPage,
+    };
   },
 });
 </script>
