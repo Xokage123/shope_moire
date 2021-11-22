@@ -18,12 +18,14 @@ const initialPropsProductList: IInitialFilterProps = {
 };
 
 // Получить корзину пользователя
-export const getBasketUser = async (token: string) => {
+export const getBasketUser = async (token?: string) => {
   const basket = await instance({
     url: `/baskets`,
-    params: {
-      userAccessKey: token,
-    },
+    params: token
+      ? {
+          userAccessKey: token,
+        }
+      : {},
   });
   return basket.data;
 };

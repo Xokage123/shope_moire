@@ -14,9 +14,25 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/product/:id",
     name: "SeparateProductPage",
-    component: () => {
-      return import("@/pages/SeparateProductPage/index.vue");
-    },
+    component: () => import("@/pages/SeparateProductPage/index.vue"),
+  },
+  // Корзина
+  {
+    path: "/basket",
+    name: "BasketPage",
+    component: () => import("@/pages/BasketPage/index.vue"),
+  },
+  // Корзина
+  {
+    path: "/checkout-order",
+    name: "CheckoutOrderPage",
+    component: () => import("@/pages/BasketPage/index.vue"),
+  },
+  // Корзина
+  {
+    path: "/successful_order",
+    name: "SuccessfulOrderPage",
+    component: () => import("@/pages/BasketPage/index.vue"),
   },
 ];
 

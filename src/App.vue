@@ -9,14 +9,32 @@
 <script lang="ts">
 // Vue
 import { defineComponent } from "vue";
+// Vuex
+import { useStore } from "vuex";
 // Components
 import Header from "@/components/Header.vue";
 import Fotter from "@/components/Fotter.vue";
+// Types
+import { IRootStore } from "@/store/types";
 
 export default defineComponent({
   components: {
     Header,
     Fotter,
+  },
+  setup: () => {
+    const $store = useStore<IRootStore>();
+
+    if (localStorage.getItem("user_token")) {
+      $store.dispatch(
+        "basket/fetchGetBasket",
+        localStorage.getItem("user_token")
+      );
+    } else {
+      $store.dispatch("basket/fetchGetBasket").then((basketInfo) => {
+        localStorage.setItem("user_token", basketInfo.user.accessKey);
+      });
+    }
   },
 });
 </script>
