@@ -73,7 +73,7 @@
 
 <script lang="ts">
 // Vue
-import { defineComponent, ref, watch } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
 // Vuex
 import { useStore } from "vuex";
 // Types
@@ -87,9 +87,14 @@ export default defineComponent({
     const totalProductBasket = ref($store.state.basket.items.length);
 
     watch(
-      () => $store.state.basket.items.length,
-      (newValue) => {
-        totalProductBasket.value = newValue;
+      () => $store.state.basket,
+      () => {
+        totalProductBasket.value = $store.state.basket.items.reduce(
+          (numberProduct: number, item: any) => {
+            return numberProduct + (item.quantity as number);
+          },
+          0
+        );
       }
     );
 

@@ -62,7 +62,7 @@
         <span class="item__code">Артикул: {{ productInfo.id }}</span>
         <h2 class="item__title">{{ productInfo.title }}</h2>
         <div class="item__form">
-          <form class="form" @submit="addToOrder">
+          <form class="form" @submit.prevent="addProductInBasket">
             <div class="item__row item__row--center">
               <div class="form__counter">
                 <button
@@ -106,7 +106,8 @@
                         class="colors__radio sr-only"
                         type="radio"
                         name="color-item"
-                        :value="color.color.title"
+                        :value="color.color.id"
+                        @click="toggleColor"
                       />
                       <span
                         class="colors__value"
@@ -135,7 +136,7 @@
                       :key="size.id"
                       :size="size.title"
                       v-for="size in productInfo.sizes"
-                      :value="size.title"
+                      :value="size.id"
                     >
                       {{ size.title }}
                     </option>
@@ -189,21 +190,30 @@
 // Vue
 import { defineComponent, ref } from "vue";
 import { useRoute } from "vue-router";
+import { useStore } from "vuex";
 // API
 import { getProductInfo } from "@/api/index";
+// Type
+import type { IRootStore } from "@/store/types";
+import { IProductInBasket } from "@/ITE/interface/product";
 
 export default defineComponent({
   setup() {
     const $route = useRoute();
+    const $store = useStore<IRootStore>();
 
-    let productInfo = ref(null);
+    let productInfo = ref<null | Record<string, unknown>>(null);
 
-    const sizeUser = ref<string | null>(null);
-
+    const productId = ref<number>(0);
+    const sizeIdUser = ref<number>(0);
+    const colorIdUser = ref<number>(0);
     const quantityOfGood = ref<number>(0);
 
     const toggleSize = (ev: any) => {
-      sizeUser.value === ev.target.value;
+      sizeIdUser.value = ev.target.value;
+    };
+    const toggleColor = (ev: any) => {
+      colorIdUser.value = ev.target.value;
     };
 
     const removeOneGood = () => {
@@ -216,15 +226,34 @@ export default defineComponent({
       quantityOfGood.value = quantityOfGood.value + 1;
     };
 
-    const addToOrder = () => {
-      if (sizeUser.value) {
-        console.log("Еуые");
+    const addProductInBasket = () => {
+      if (
+        productId.value &&
+        colorIdUser.value &&
+        sizeIdUser.value &&
+        quantityOfGood.value &&
+        localStorage.getItem("user_token")
+      ) {
+        $store
+          .dispatch("basket/fetchAddProductInBasket", {
+            information: {
+              productId: String(productId.value),
+              colorId: String(colorIdUser.value),
+              sizeId: String(sizeIdUser.value),
+              quantity: String(quantityOfGood.value),
+            } as IProductInBasket,
+            token: localStorage.getItem("user_token"),
+          })
+          .then((res) => {
+            console.log(res);
+          });
       }
     };
 
     getProductInfo(Number($route.params.id)).then((product) => {
-      console.log(product);
       productInfo.value = product;
+      productId.value = product.id;
+      sizeIdUser.value = product.sizes[0].id;
     });
 
     return {
@@ -232,7 +261,8 @@ export default defineComponent({
       quantityOfGood,
 
       toggleSize,
-      addToOrder,
+      toggleColor,
+      addProductInBasket,
       removeOneGood,
       addOneGood,
     };

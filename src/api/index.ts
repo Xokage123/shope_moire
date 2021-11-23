@@ -2,7 +2,7 @@ import {
   IProductsListProps,
   IInitialFilterProps,
   IProductInBasket,
-} from "./../ITE/interface/product";
+} from "@/ITE/interface/product";
 import axios from "axios";
 
 const BASE_PATH = "https://vue-moire.skillbox.cc/api";
