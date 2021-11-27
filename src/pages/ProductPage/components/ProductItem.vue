@@ -17,39 +17,40 @@
         />
       </router-link>
     </a>
+    <div class="catalog__info">
+      <h3 class="catalog__title">
+        <a href="#"> {{ product.title }} </a>
+      </h3>
 
-    <h3 class="catalog__title">
-      <a href="#"> {{ product.title }} </a>
-    </h3>
+      <span class="catalog__price"> {{ product.price }} ₽ </span>
 
-    <span class="catalog__price"> {{ product.price }} ₽ </span>
-
-    <ul class="colors colors--black">
-      <li
-        :key="color.id"
-        :color="color"
-        v-for="color in product.colors"
-        class="colors__item"
-      >
-        <label class="colors__label">
-          <input
-            class="colors__radio sr-only"
-            type="radio"
-            name="color-1"
-            :value="color.color.code"
-            checked=""
-          />
-          <span
-            class="colors__value"
-            :style="{
-              background: color.color.code,
-              border: '1px solid black',
-            }"
-          >
-          </span>
-        </label>
-      </li>
-    </ul>
+      <ul class="colors colors--black">
+        <li
+          :key="color.id"
+          :color="color"
+          v-for="color in product.colors"
+          class="colors__item"
+        >
+          <label class="colors__label">
+            <input
+              class="colors__radio sr-only"
+              type="radio"
+              name="color-1"
+              :value="color.color.code"
+              checked=""
+            />
+            <span
+              class="colors__value"
+              :style="{
+                background: color.color.code,
+                border: '1px solid black',
+              }"
+            >
+            </span>
+          </label>
+        </li>
+      </ul>
+    </div>
   </li>
 </template>
 
@@ -70,6 +71,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .catalog {
+  &__info {
+    padding: 10px;
+  }
+
   &__item {
     &:hover {
       box-shadow: 0 0 10px black;
