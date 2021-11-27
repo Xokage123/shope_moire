@@ -24,15 +24,15 @@ const routes: Array<RouteRecordRaw> = [
   },
   // Корзина
   {
-    path: "/checkout-order",
+    path: "/checkout_order",
     name: "CheckoutOrderPage",
-    component: () => import("@/pages/BasketPage/index.vue"),
+    component: () => import("@/pages/CheckoutOrderPage/index.vue"),
   },
   // Корзина
   {
     path: "/successful_order",
     name: "SuccessfulOrderPage",
-    component: () => import("@/pages/BasketPage/index.vue"),
+    component: () => import("@/pages/SuccessfulOrderPage/index.vue"),
   },
 ];
 
