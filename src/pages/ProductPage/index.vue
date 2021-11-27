@@ -63,15 +63,18 @@ export default defineComponent({
       }
     );
 
+    const totalProducts = ref<number>($store.state.products.totalProducts);
+
     watch(
       () => $store.state.products.listProducts,
       () => {
         listProduct.value = $store.state.products.listProducts;
+        totalProducts.value = $store.state.products.totalProducts;
       }
     );
 
     return {
-      totalProducts: $store.state.products.totalProducts,
+      totalProducts,
       listProduct,
     };
   },

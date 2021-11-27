@@ -6,19 +6,19 @@
         <legend class="form__legend">Цена</legend>
         <label class="form__label form__label--price">
           <input
+            v-model="priceFilter.start"
             class="form__input"
             type="number"
             name="min-price"
-            v-model="priceFilter.start"
           />
           <span class="form__value">От</span>
         </label>
         <label class="form__label form__label--price">
           <input
+            v-model="priceFilter.end"
             class="form__input"
             type="number"
             name="max-price"
-            v-model="priceFilter.end"
           />
           <span class="form__value">До</span>
         </label>
@@ -27,7 +27,11 @@
       <fieldset class="form__block">
         <legend class="form__legend">Категория</legend>
         <label class="form__label form__label--select">
-          <select v-model="categoryId" class="form__select" name="category">
+          <select
+            v-model="actualCategoryId"
+            class="form__select"
+            name="category"
+          >
             <option
               :key="category.id"
               :label="category.title"
@@ -42,17 +46,17 @@
         <legend class="form__legend">Материал</legend>
         <ul v-if="materialsList.length" class="check-list">
           <li
-            :material="material"
             :key="material.id"
             v-for="material in materialsList"
             class="check-list__item"
           >
             <label class="check-list__label">
               <input
+                @click="addmaterialInList(material.id)"
+                :value="material.title"
                 class="check-list__check sr-only"
                 type="checkbox"
                 name="material"
-                :value="material.title"
               />
               <span class="check-list__desc">
                 {{ material.title }}
@@ -67,23 +71,23 @@
         <legend class="form__legend">Цвет</legend>
         <ul v-if="colorsList.length" class="check-list">
           <li
-            :color="color"
             :key="color.id"
             v-for="color in colorsList"
             class="check-list__item"
           >
             <label class="check-list__label">
               <input
+                @click="addActualColor(color.id)"
+                :value="color.title"
                 class="check-list__check sr-only"
                 type="checkbox"
                 name="color"
-                :value="color.title"
               />
               <span
+                class="check-list__desc"
                 :style="{
                   background: color.code,
                 }"
-                class="check-list__desc"
               ></span>
             </label>
           </li>
@@ -101,6 +105,7 @@
           >
             <label class="check-list__label">
               <input
+                @click="addActualSeason(season.id)"
                 class="check-list__check sr-only"
                 type="checkbox"
                 name="collection"
@@ -139,7 +144,9 @@
 import { defineComponent, onMounted, reactive, ref } from "vue";
 import { useStore } from "vuex";
 // Types
-import { IRootStore } from "@/store/types";
+import type { IRootStore } from "@/store/types";
+import type { IProductsListProps } from "@/ITE/interface/product";
+import type { ILoadListProductProps } from "@/store/modules/Products/actions/types";
 
 interface IPriceProps {
   start: number;
@@ -157,12 +164,53 @@ export default defineComponent({
       end: 0,
     });
 
-    const actualCategoryId = ref(null);
-    const actualSeasonsList = ref([]);
-    const actualMaterialsList = ref([]);
-    const actualColorsList = ref([]);
+    const actualCategoryId = ref<number | null>(null);
 
-    const categoryId = ref(null);
+    const actualSeasonsList = ref<Array<number>>([]);
+    const addActualSeason = (id: number) => {
+      const check = actualSeasonsList.value.some((arrayId) => {
+        return arrayId === id;
+      });
+      if (check) {
+        actualSeasonsList.value = actualSeasonsList.value.filter((arrayId) => {
+          return arrayId !== id;
+        });
+      } else {
+        actualSeasonsList.value.push(id);
+      }
+    };
+
+    const actualMaterialsList = ref<Array<number>>([]);
+    const addmaterialInList = (id: number) => {
+      const check = actualMaterialsList.value.some((arrayId) => {
+        return arrayId === id;
+      });
+      if (check) {
+        actualMaterialsList.value = actualMaterialsList.value.filter(
+          (arrayId) => {
+            return arrayId !== id;
+          }
+        );
+      } else {
+        actualMaterialsList.value.push(id);
+      }
+    };
+
+    const actualColorsList = ref<Array<number>>([]);
+    const addActualColor = (id: number) => {
+      const check = actualColorsList.value.some((colorId) => {
+        return colorId === id;
+      });
+      if (check) {
+        actualColorsList.value = actualColorsList.value.filter((colorId) => {
+          return colorId !== id;
+        });
+      } else {
+        actualColorsList.value.push(id);
+      }
+      console.log(actualColorsList.value);
+    };
+
     const categoryList = ref($store.state.filters.categoriesProduct);
     const seasonsList = ref($store.state.filters.seasonsList);
     const materialsList = ref($store.state.filters.materialList);
@@ -170,7 +218,33 @@ export default defineComponent({
 
     // Применение фильтров
     const applyFilter = () => {
-      console.log(categoryId.value);
+      console.log("Цена минимальная:", priceFilter.start);
+      console.log("Цена мксимальная:", priceFilter.end);
+      console.log("Категория", actualCategoryId.value);
+      console.log("Материалы", actualMaterialsList.value);
+      console.log("Цвета", actualColorsList.value);
+      console.log("Сезон", actualSeasonsList.value);
+
+      if (actualCategoryId.value) {
+        const filter: IProductsListProps = {
+          minPrice: priceFilter.start,
+          maxPrice: priceFilter.end,
+          categoryId: actualCategoryId.value,
+          materialIds: actualMaterialsList.value,
+          colorIds: actualColorsList.value,
+          seasonIds: actualSeasonsList.value,
+        };
+
+        $store
+          .dispatch("products/loadListProduct", {
+            numberPage: 1,
+            filtersObject: filter,
+          } as ILoadListProductProps)
+          .then((list) => {
+            console.log(list);
+          });
+      }
+
       clearFilters();
     };
     // Очистка фильтра
@@ -207,16 +281,34 @@ export default defineComponent({
     });
 
     return {
-      priceFilter,
-      categoryId,
-      categoryList,
-      seasonsList,
-      materialsList,
-      colorsList,
-
       applyFilter,
       clearFilters,
+
+      priceFilter,
+
+      categoryList,
+      actualCategoryId,
+
+      seasonsList,
+      addActualSeason,
+
+      materialsList,
+      addmaterialInList,
+
+      colorsList,
+      addActualColor,
     };
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.check {
+  &-list {
+    &__color {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+</style>

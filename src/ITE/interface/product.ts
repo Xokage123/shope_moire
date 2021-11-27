@@ -1,5 +1,5 @@
 export interface IProductsListProps {
-  categoryId?: string;
+  categoryId?: number;
   materialIds?: Array<number>;
   seasonIds?: Array<number>;
   colorIds?: Array<number>;

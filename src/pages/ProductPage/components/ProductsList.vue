@@ -6,7 +6,7 @@
       v-for="product in actualListProducts"
     />
   </ul>
-  <div v-else>Загрузка...</div>
+  <div v-else>{{ textLoad }}</div>
 </template>
 
 <script lang="ts">
@@ -27,14 +27,23 @@ export default defineComponent({
   setup(props) {
     let actualListProducts = ref(props.products);
 
+    const textLoad = ref<string>("Загузка...");
+
     watch(
       () => props.products,
       (newList) => {
-        actualListProducts.value = newList;
+        if (actualListProducts.value?.length) {
+          actualListProducts.value = newList;
+        } else {
+          actualListProducts.value = newList;
+          textLoad.value = "Товары по вашему запросу не были найдены";
+        }
       }
     );
     return {
       actualListProducts,
+
+      textLoad,
     };
   },
 });

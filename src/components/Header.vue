@@ -84,7 +84,16 @@ export default defineComponent({
   setup: () => {
     const $store = useStore<IRootStore>();
 
-    const totalProductBasket = ref($store.state.basket.items.length);
+    const numberProductToBasket = computed(() => {
+      return $store.state.basket.items.reduce(
+        (numberProduct: number, item: any) => {
+          return numberProduct + (item.quantity as number);
+        },
+        0
+      );
+    });
+
+    const totalProductBasket = ref<number>(numberProductToBasket.value);
 
     watch(
       () => $store.state.basket,
