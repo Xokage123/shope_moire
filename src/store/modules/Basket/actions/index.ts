@@ -1,6 +1,11 @@
 import { ActionTree } from "vuex";
 // API
-import { getBasketUser, addProductToBasket } from "@/api/index";
+import {
+  getBasketUser,
+  addProductToBasket,
+  toggleProductToBasket,
+  removeProductFromBasket,
+} from "@/api/index";
 // Types
 import type { IBasketStore } from "../types";
 import type { IRootStore } from "@/store/types";
@@ -27,6 +32,37 @@ const actionsBasket: ActionTree<IBasketStore, IRootStore> = {
       context.rootState.basket = basket;
       return basket;
     }
+  },
+  async fetchToggleAmount(
+    context,
+    {
+      token,
+      information,
+    }: {
+      token: string;
+      information: {
+        basketItemId: string;
+        quantity: string;
+      };
+    }
+  ) {
+    const basket = await toggleProductToBasket(token, information);
+    context.rootState.basket = basket;
+    return basket;
+  },
+  async fetchRemoveProduct(
+    context,
+    {
+      token,
+      id,
+    }: {
+      token: string;
+      id: string;
+    }
+  ) {
+    const basket = await removeProductFromBasket(token, id);
+    context.rootState.basket = basket;
+    return basket;
   },
 };
 

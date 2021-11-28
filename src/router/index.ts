@@ -22,13 +22,13 @@ const routes: Array<RouteRecordRaw> = [
     name: "BasketPage",
     component: () => import("@/pages/BasketPage/index.vue"),
   },
-  // Корзина
+  // Оформление заказа
   {
     path: "/checkout_order",
     name: "CheckoutOrderPage",
     component: () => import("@/pages/CheckoutOrderPage/index.vue"),
   },
-  // Корзина
+  // Успешное оформление заказа
   {
     path: "/successful_order",
     name: "SuccessfulOrderPage",

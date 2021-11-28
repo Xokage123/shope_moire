@@ -70,8 +70,17 @@
                   type="button"
                   aria-label="Убрать один товар"
                 >
-                  <svg width="12" height="12" fill="currentColor">
-                    <use xlink:href="#icon-minus"></use>
+                  <svg
+                    width="9"
+                    height="3"
+                    viewBox="0 0 9 3"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8.287 2.574H0.7V0.765H8.287V2.574Z"
+                      fill="#9D9D9D"
+                    />
                   </svg>
                 </button>
 
@@ -82,8 +91,17 @@
                   type="button"
                   aria-label="Добавить один товар"
                 >
-                  <svg width="12" height="12" fill="currentColor">
-                    <use xlink:href="#icon-plus"></use>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M6.524 11.086H5.094V6.576H0.54V5.102H5.094V0.57H6.524V5.102H11.078V6.576H6.524V11.086Z"
+                      fill="#9D9D9D"
+                    />
                   </svg>
                 </button>
               </div>
@@ -269,3 +287,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.colors {
+  &__value {
+    border: 1px solid black;
+  }
+}
+</style>

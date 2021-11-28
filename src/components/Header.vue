@@ -73,25 +73,20 @@
 
 <script lang="ts">
 // Vue
-import { computed, defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, watch } from "vue";
 // Vuex
 import { useStore } from "vuex";
 // Types
 import { IRootStore } from "@/store/types";
+
+import helperBasket from "@/helpers/basket";
 
 export default defineComponent({
   name: "Header",
   setup: () => {
     const $store = useStore<IRootStore>();
 
-    const numberProductToBasket = computed(() => {
-      return $store.state.basket.items.reduce(
-        (numberProduct: number, item: any) => {
-          return numberProduct + (item.quantity as number);
-        },
-        0
-      );
-    });
+    const { numberProductToBasket } = helperBasket();
 
     const totalProductBasket = ref<number>(numberProductToBasket.value);
 

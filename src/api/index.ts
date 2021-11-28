@@ -62,6 +62,20 @@ export const toggleProductToBasket = async (
   });
   return basket.data;
 };
+// Удалить товар из корзины
+export const removeProductFromBasket = async (token: string, id: string) => {
+  const basket = await instance({
+    method: "DELETE",
+    url: `/baskets/products`,
+    params: {
+      userAccessKey: token,
+    },
+    data: {
+      basketItemId: id,
+    },
+  });
+  return basket.data;
+};
 
 // ------------------------------------------------------------------------------------
 
@@ -126,6 +140,25 @@ export const getProductColor = async () => {
     url: `/colors`,
   });
   return seasons.data.items;
+};
+
+// ------------------------------------------------------------------------------------
+// Получить способ доставки
+export const getDeliveries = async () => {
+  const deliveries = await instance({
+    url: `/deliveries`,
+  });
+  return deliveries.data;
+};
+// Получить способ доставки
+export const getPayments = async (id: number) => {
+  const payments = await instance({
+    url: `/payments`,
+    params: {
+      deliveryTypeId: id,
+    },
+  });
+  return payments.data;
 };
 
 // ------------------------------------------------------------------------------------
