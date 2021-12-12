@@ -13,6 +13,15 @@ const helperBasket = () => {
     )
   );
 
+  const numberProductToOrder = computed(() => {
+    return $store.state.basket.order
+      ? $store.state.basket.order.basket.items.reduce(
+          (numberProduct: number, item: any) => numberProduct + item.quantity,
+          0
+        )
+      : 0;
+  });
+
   const totalPrice = computed(() => {
     return $store.state.basket.items.reduce((totalPrice: number, item: any) => {
       return totalPrice + item.price * item.quantity;
@@ -20,6 +29,7 @@ const helperBasket = () => {
   });
   return {
     numberProductToBasket,
+    numberProductToOrder,
     totalPrice,
   };
 };

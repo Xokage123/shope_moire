@@ -1,13 +1,17 @@
 import { ActionTree } from "vuex";
-// API
+
 import {
   getBasketUser,
   addProductToBasket,
   toggleProductToBasket,
   removeProductFromBasket,
+  getDeliveries,
+  getPayments,
+  getOrder,
+  postOrder,
 } from "@/api/index";
-// Types
-import type { IBasketStore } from "../types";
+
+import type { IBasketStore, IOrderInformation } from "../types";
 import type { IRootStore } from "@/store/types";
 import { IProductInBasket } from "@/ITE/interface/product";
 
@@ -63,6 +67,46 @@ const actionsBasket: ActionTree<IBasketStore, IRootStore> = {
     const basket = await removeProductFromBasket(token, id);
     context.rootState.basket = basket;
     return basket;
+  },
+  async fetchAddDeliveries(context) {
+    const listDeliveries = await getDeliveries();
+    context.rootState.basket.deliveries = listDeliveries;
+    return listDeliveries;
+  },
+  async fetchAddPayment(context, id: number) {
+    const listPayment = await getPayments(id);
+    context.rootState.basket.payments = listPayment;
+    return listPayment;
+  },
+  async fetchPostOrder(
+    { rootState },
+    {
+      token,
+      information,
+    }: {
+      token: string;
+      information: IOrderInformation;
+    }
+  ) {
+    const orderInfo = await postOrder(token, information);
+    const basket: IBasketStore = await getBasketUser(token);
+    rootState.basket = basket;
+    rootState.basket.order = orderInfo;
+    return orderInfo;
+  },
+  async fetchGetOrder(
+    context,
+    {
+      token,
+      orderId,
+    }: {
+      token: string;
+      orderId: string;
+    }
+  ) {
+    const orderInfo = await getOrder(token, orderId);
+    context.rootState.basket.order = orderInfo;
+    return orderInfo;
   },
 };
 

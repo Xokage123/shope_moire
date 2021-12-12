@@ -8,6 +8,9 @@ import actionsProducts from "./actions";
 const state: IBasketStore = {
   id: 0,
   items: [],
+  order: null,
+  deliveries: [],
+  payments: [],
   user: {
     id: 0,
     accessKey: "",

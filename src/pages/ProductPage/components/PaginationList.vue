@@ -4,14 +4,23 @@
       <button
         :disabled="actualPageNumber == 1"
         @click="goToPrevPage"
-        class="pagination__link pagination__link--arrow"
+        class="pagination__link pagination__link--arrow pointer"
         :class="{
           'pagination__link--disabled': actualPageNumber == 1,
         }"
         aria-label="Предыдущая страница"
       >
-        <svg width="8" height="14" fill="currentColor">
-          <use xlink:href="#icon-arrow-left"></use>
+        <svg
+          width="7"
+          height="12"
+          viewBox="0 0 7 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6.31836 11.0343L1.31836 6.0343L6.31836 1.0343"
+            stroke="#222222"
+          />
         </svg>
       </button>
     </li>
@@ -19,7 +28,7 @@
       :key="numberPage"
       :numberPage="numberPage"
       v-for="numberPage in paginationItems"
-      class="pagination__item"
+      class="pagination__item pointer"
     >
       <a
         class="pagination__link"
@@ -35,14 +44,20 @@
       <button
         :disabled="totalPage === actualPageNumber"
         @click="goToNextPage"
-        class="pagination__link pagination__link--arrow"
+        class="pagination__link pagination__link--arrow pointer"
         :class="{
           'pagination__link--disabled': totalPage === actualPageNumber,
         }"
         aria-label="Следующая страница"
       >
-        <svg width="8" height="14" fill="currentColor">
-          <use xlink:href="#icon-arrow-right"></use>
+        <svg
+          width="7"
+          height="12"
+          viewBox="0 0 7 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M1.25 11.0343L6.25 6.0343L1.25 1.0343" stroke="#222222" />
         </svg>
       </button>
     </li>

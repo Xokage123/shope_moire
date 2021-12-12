@@ -2,10 +2,24 @@
   <div class="content__top">
     <ul class="breadcrumbs">
       <li class="breadcrumbs__item">
-        <a class="breadcrumbs__link" href="index.html"> Каталог </a>
+        <router-link
+          class="breadcrumbs__link pointer"
+          :to="{
+            name: 'ProductsPage',
+          }"
+        >
+          Каталог
+        </router-link>
       </li>
       <li class="breadcrumbs__item">
-        <a class="breadcrumbs__link" href="cart.html"> Корзина </a>
+        <router-link
+          class="breadcrumbs__link pointer"
+          :to="{
+            name: 'BasketPage',
+          }"
+        >
+          Корзина
+        </router-link>
       </li>
       <li class="breadcrumbs__item">
         <a class="breadcrumbs__link"> Оформление заказа </a>
@@ -18,11 +32,12 @@
   </div>
 
   <section class="cart">
-    <form class="cart__form form" action="#" method="POST">
+    <form class="cart__form form" @submit.prevent="checkoutBasketForm">
       <div class="cart__field">
         <div class="cart__data">
           <label class="form__label">
             <input
+              v-model="initialUser"
               class="form__input"
               type="text"
               name="name"
@@ -33,6 +48,7 @@
 
           <label class="form__label">
             <input
+              v-model="addressUser"
               class="form__input"
               type="text"
               name="address"
@@ -43,17 +59,22 @@
 
           <label class="form__label">
             <input
+              v-model="phoneUser"
+              @input="changePhone"
               class="form__input"
               type="tel"
               name="phone"
               placeholder="Введите ваш телефон"
             />
             <span class="form__value">Телефон</span>
-            <span class="form__error">Неверный формат телефона</span>
+            <span v-if="checkPhone" class="form__error">
+              Неверный формат телефона
+            </span>
           </label>
 
           <label class="form__label">
             <input
+              v-model="emailUser"
               class="form__input"
               type="email"
               name="email"
@@ -64,6 +85,7 @@
 
           <label class="form__label">
             <textarea
+              v-model="messageUser"
               class="form__input form__input--area"
               name="comments"
               placeholder="Ваши пожелания"
@@ -75,54 +97,42 @@
         <div class="cart__options">
           <h3 class="cart__title">Доставка</h3>
           <ul class="cart__options options">
-            <li class="options__item">
+            <li
+              :key="delivery.id"
+              v-for="delivery in deliveries"
+              class="options__item"
+            >
               <label class="options__label">
                 <input
                   class="options__radio sr-only"
                   type="radio"
+                  @input="definePayment(delivery)"
                   name="delivery"
-                  value="0"
-                  checked=""
+                  :value="delivery.id"
                 />
-                <span class="options__value"> Самовывоз <b>бесплатно</b> </span>
-              </label>
-            </li>
-            <li class="options__item">
-              <label class="options__label">
-                <input
-                  class="options__radio sr-only"
-                  type="radio"
-                  name="delivery"
-                  value="500"
-                />
-                <span class="options__value"> Курьером <b>290 ₽</b> </span>
+                <span class="options__value">
+                  {{ delivery.title }} <b>{{ delivery.price }} ₽</b>
+                </span>
               </label>
             </li>
           </ul>
 
           <h3 class="cart__title">Оплата</h3>
           <ul class="cart__options options">
-            <li class="options__item">
+            <li
+              :key="payment.id"
+              v-for="payment in payments"
+              class="options__item"
+            >
               <label class="options__label">
                 <input
                   class="options__radio sr-only"
+                  @input="toggleActualPaymentId(payment.id)"
                   type="radio"
                   name="pay"
-                  value="card"
-                  checked=""
+                  :value="payment.id"
                 />
                 <span class="options__value"> Картой при получении </span>
-              </label>
-            </li>
-            <li class="options__item">
-              <label class="options__label">
-                <input
-                  class="options__radio sr-only"
-                  type="radio"
-                  name="pay"
-                  value="cash"
-                />
-                <span class="options__value"> Наличными при получении </span>
               </label>
             </li>
           </ul>
@@ -131,33 +141,33 @@
 
       <div class="cart__block">
         <ul class="cart__orders">
-          <li class="cart__order">
-            <h3>Смартфон Xiaomi Redmi Note 7 Pro 6/128GB</h3>
-            <b>990 ₽</b>
-            <span>Артикул: 150030</span>
-          </li>
-          <li class="cart__order">
-            <h3>Гироскутер Razor Hovertrax 2.0ii</h3>
-            <b>1 990 ₽</b>
-            <span>Артикул: 150030</span>
-          </li>
-          <li class="cart__order">
-            <h3>Электрический дрифт-карт Razor Lil’ Crazy</h3>
-            <b>4 090 ₽</b>
-            <span>Артикул: 150030</span>
+          <li
+            :key="product.id"
+            v-for="product in listProduct"
+            class="cart__order"
+          >
+            <h3>{{ product.product.title }} ({{ product.quantity }} шт.)</h3>
+            <b>{{ product.price * product.quantity }} ₽</b>
+            <span>Артикул: {{ product.id }}</span>
           </li>
         </ul>
 
-        <div class="cart__total">
-          <p>Доставка: <b>бесплатно</b></p>
-          <p>Итого: <b>3</b> товара на сумму <b>4 070 ₽</b></p>
+        <div v-if="actualDelivery" class="cart__total">
+          <p>
+            Доставка: <b>{{ actualDelivery.price }} ₽</b>
+          </p>
+          <p>
+            Итого:
+            <b>{{ numberProductToBasket }}</b> товара на сумму
+            <b>{{ Number(totalPrice) + Number(actualDelivery.price) }} ₽</b>
+          </p>
         </div>
 
         <button class="cart__button button button--primery" type="submit">
           Оформить заказ
         </button>
       </div>
-      <div class="cart__error form__error-block">
+      <div v-if="checkError" class="cart__error form__error-block">
         <h4>Заявка не отправлена!</h4>
         <p>
           Похоже произошла ошибка. Попробуйте отправить снова или перезагрузите
@@ -169,6 +179,146 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-export default defineComponent({});
+import { defineComponent, onMounted, ref, watch } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+
+import helperBasket from "@/helpers/basket";
+
+import type { IRootStore } from "@/store/types";
+import type {
+  IDeliveries,
+  IPayments,
+  IOrderInformation,
+} from "@/store/modules/Basket/types";
+
+export default defineComponent({
+  setup: () => {
+    const $store = useStore<IRootStore>();
+    const $router = useRouter();
+
+    const { totalPrice, numberProductToBasket } = helperBasket();
+
+    const listProduct = ref<unknown[]>($store.state.basket.items);
+
+    const deliveries = ref<IDeliveries[]>($store.state.basket.deliveries);
+    const actualDelivery = ref<IDeliveries | null>(null);
+    const actualDeliveryId = ref<number>(0);
+
+    const payments = ref<IPayments[]>($store.state.basket.payments);
+    const actualPaymentId = ref<number>(0);
+    const toggleActualPaymentId = (id: number) => {
+      actualPaymentId.value = id;
+    };
+    const definePayment = (delivery: IDeliveries) => {
+      actualDeliveryId.value = delivery.id;
+      actualDelivery.value = delivery;
+      $store
+        .dispatch("basket/fetchAddPayment", delivery.id)
+        .then((listPayment) => {
+          payments.value = listPayment;
+        });
+    };
+
+    const initialUser = ref<string>("");
+    const addressUser = ref<string>("");
+    const phoneUser = ref<string>("");
+    const checkPhone = ref<boolean>(false);
+    const emailUser = ref<string>("");
+    const messageUser = ref<string>("");
+
+    const changePhone = (ev: any) => {
+      const value = ev.target.value as string;
+      if (value.length === 1) {
+        checkPhone.value = value.startsWith("+") ? false : true;
+      } else {
+        checkPhone.value =
+          value.startsWith("+") &&
+          Number(value.slice(1)) &&
+          value !== "" &&
+          value.length === 12
+            ? false
+            : true;
+      }
+    };
+
+    const checkError = ref<boolean>(false);
+
+    const checkoutBasketForm = () => {
+      if (
+        initialUser.value &&
+        addressUser.value &&
+        phoneUser.value &&
+        emailUser.value &&
+        actualDeliveryId.value &&
+        actualPaymentId.value
+      ) {
+        const information: IOrderInformation = {
+          name: initialUser.value,
+          address: addressUser.value,
+          phone: phoneUser.value,
+          email: emailUser.value,
+          deliveryTypeId: actualDeliveryId.value,
+          paymentTypeId: actualPaymentId.value,
+          comment: messageUser.value,
+        };
+
+        $store
+          .dispatch("basket/fetchPostOrder", {
+            token: localStorage.getItem("user_token"),
+            information,
+          })
+          .then(() => {
+            localStorage.setItem("user_token", "");
+            $router.push({
+              name: "SuccessfulOrderPage",
+            });
+          });
+      } else {
+        checkError.value = true;
+
+        setTimeout(() => {
+          checkError.value = false;
+        }, 3000);
+      }
+    };
+
+    watch(
+      () => $store.state.basket.items,
+      (listProductActual) => {
+        listProduct.value = listProductActual;
+      }
+    );
+
+    onMounted(() => {
+      $store.dispatch("basket/fetchAddDeliveries").then((res) => {
+        deliveries.value = res;
+      });
+    });
+
+    return {
+      initialUser,
+      addressUser,
+      phoneUser,
+      checkPhone,
+      changePhone,
+      emailUser,
+      messageUser,
+      checkoutBasketForm,
+
+      payments,
+      toggleActualPaymentId,
+      definePayment,
+
+      listProduct,
+      totalPrice,
+      numberProductToBasket,
+
+      deliveries,
+      actualDelivery,
+
+      checkError,
+    };
+  },
+});
 </script>

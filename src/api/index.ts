@@ -1,9 +1,12 @@
+import axios from "axios";
+
 import {
   IProductsListProps,
   IInitialFilterProps,
   IProductInBasket,
 } from "@/ITE/interface/product";
-import axios from "axios";
+
+import { IOrderInformation } from "@/store/modules/Basket/types";
 
 const BASE_PATH = "https://vue-moire.skillbox.cc/api";
 
@@ -15,6 +18,33 @@ const instance = axios.create({
 const initialPropsProductList: IInitialFilterProps = {
   limit: 12,
   page: 1,
+};
+
+// Отправить заказ
+export const postOrder = async (
+  token: string,
+  information: IOrderInformation
+) => {
+  const orders = await instance({
+    method: "POST",
+    url: `/orders`,
+    params: {
+      userAccessKey: token,
+    },
+    data: information,
+  });
+  return orders.data;
+};
+// Получить ииформацию о заказе
+export const getOrder = async (token: string, orderId: string) => {
+  const orders = await instance({
+    url: `/orders/${orderId}`,
+    params: {
+      userAccessKey: token,
+      orderId,
+    },
+  });
+  return orders.data;
 };
 
 // Получить корзину пользователя

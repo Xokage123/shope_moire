@@ -3,6 +3,7 @@
     <ul class="breadcrumbs">
       <li class="breadcrumbs__item">
         <router-link
+          class="breadcrumbs__link pointer"
           :to="{
             name: 'ProductsPage',
           }"
@@ -42,8 +43,12 @@
             <p class="product__info product__info--color">
               Цвет:
               <span>
-                <i style="background-color: #ff9b78"></i>
-                Персиковый
+                <i
+                  :style="{
+                    backgroundColor: product.color.color.code,
+                  }"
+                ></i>
+                {{ product.color.color.title }}
               </span>
             </p>
             <span class="product__code"> Артикул: {{ product.id }} </span>
@@ -192,6 +197,7 @@ export default defineComponent({
     watch(
       () => $store.state.basket.items,
       (newValue) => {
+        console.log(newValue);
         productsBasket.value = newValue;
       }
     );
