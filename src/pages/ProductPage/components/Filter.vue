@@ -6,7 +6,7 @@
         <legend class="form__legend">Цена</legend>
         <label class="form__label form__label--price">
           <input
-            v-model="priceFilter.start"
+            v-model="priceFilter.end"
             class="form__input"
             type="number"
             name="min-price"
@@ -15,7 +15,7 @@
         </label>
         <label class="form__label form__label--price">
           <input
-            v-model="priceFilter.end"
+            v-model="priceFilter.start"
             class="form__input"
             type="number"
             name="max-price"
@@ -140,13 +140,11 @@
 </template>
 
 <script lang="ts">
-// Vue
 import { defineComponent, onMounted, reactive, ref } from "vue";
 import { useStore } from "vuex";
-// Types
+
 import type { IRootStore } from "@/store/types";
 import type { IProductsListProps } from "@/ITE/interface/product";
-import type { ILoadListProductProps } from "@/store/modules/Products/actions/types";
 
 interface IPriceProps {
   start: number;
@@ -208,7 +206,6 @@ export default defineComponent({
       } else {
         actualColorsList.value.push(id);
       }
-      console.log(actualColorsList.value);
     };
 
     const categoryList = ref($store.state.filters.categoriesProduct);
@@ -218,13 +215,6 @@ export default defineComponent({
 
     // Применение фильтров
     const applyFilter = () => {
-      console.log("Цена минимальная:", priceFilter.start);
-      console.log("Цена мксимальная:", priceFilter.end);
-      console.log("Категория", actualCategoryId.value);
-      console.log("Материалы", actualMaterialsList.value);
-      console.log("Цвета", actualColorsList.value);
-      console.log("Сезон", actualSeasonsList.value);
-
       if (actualCategoryId.value) {
         const filter: IProductsListProps = {
           minPrice: priceFilter.start,
@@ -235,22 +225,20 @@ export default defineComponent({
           seasonIds: actualSeasonsList.value,
         };
 
-        $store
-          .dispatch("products/loadListProduct", {
-            numberPage: 1,
-            filtersObject: filter,
-          } as ILoadListProductProps)
-          .then((list) => {
-            console.log(list);
-          });
+        $store.dispatch("products/loadListProduct", {
+          numberPage: 1,
+          filtersObject: filter,
+        });
       }
-
-      clearFilters();
     };
     // Очистка фильтра
     const clearFilters = () => {
       priceFilter.start = 0;
       priceFilter.end = 0;
+      actualCategoryId.value = null;
+      actualSeasonsList.value = [];
+      actualMaterialsList.value = [];
+      actualColorsList.value = [];
     };
 
     onMounted(() => {

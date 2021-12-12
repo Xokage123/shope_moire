@@ -197,7 +197,6 @@ export default defineComponent({
     watch(
       () => $store.state.basket.items,
       (newValue) => {
-        console.log(newValue);
         productsBasket.value = newValue;
       }
     );

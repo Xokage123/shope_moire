@@ -75,9 +75,7 @@ export default defineComponent({
   setup() {
     const $storeProducts = useStore<IRootStore>();
 
-    const actualPageNumber = ref(
-      $storeProducts.state.products.actualNumberPage
-    );
+    const actualPageNumber = ref<number>(1);
 
     const totalPage = ref($storeProducts.state.products.totalNumberPage);
 
