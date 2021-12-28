@@ -123,7 +123,7 @@
                       <input
                         class="colors__radio sr-only"
                         type="radio"
-                        name="color-item"
+                        name="color"
                         :value="color.color.id"
                         @click="toggleColor"
                       />
@@ -225,7 +225,7 @@ export default defineComponent({
     const productId = ref<number>(0);
     const sizeIdUser = ref<number>(0);
     const colorIdUser = ref<number>(0);
-    const quantityOfGood = ref<number>(0);
+    const quantityOfGood = ref<number>(1);
 
     const toggleSize = (ev: any) => {
       sizeIdUser.value = ev.target.value;
@@ -235,7 +235,7 @@ export default defineComponent({
     };
 
     const removeOneGood = () => {
-      if (quantityOfGood.value > 0) {
+      if (quantityOfGood.value > 1) {
         quantityOfGood.value = quantityOfGood.value - 1;
       }
     };

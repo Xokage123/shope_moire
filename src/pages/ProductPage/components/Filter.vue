@@ -69,22 +69,18 @@
       <!-- Цвета -->
       <fieldset class="form__block">
         <legend class="form__legend">Цвет</legend>
-        <ul v-if="colorsList.length" class="check-list">
-          <li
-            :key="color.id"
-            v-for="color in colorsList"
-            class="check-list__item"
-          >
-            <label class="check-list__label">
+        <ul v-if="colorsList.length" class="colors colors--black">
+          <li :key="color.id" v-for="color in colorsList" class="colors__item">
+            <label class="colors__label">
               <input
                 @click="addActualColor(color.id)"
                 :value="color.title"
-                class="check-list__check sr-only"
+                class="colors__radio sr-only"
                 type="checkbox"
                 name="color"
               />
               <span
-                class="check-list__desc"
+                class="colors__value"
                 :style="{
                   background: color.code,
                 }"
