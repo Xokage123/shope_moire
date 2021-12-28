@@ -21,36 +21,29 @@
       </ul>
     </div>
 
-    <section class="item">
+    <section v-if="colorActive" class="item">
       <div class="item__pics pics">
         <div class="pics__wrapper">
           <img
             width="570"
             height="570"
-            src="img/product-square-1.jpg"
-            srcset="img/product-square-1@2x.jpg 2x"
+            :src="colorActive.gallery[0].file.url"
             alt="Название товара"
           />
         </div>
         <ul v-if="productInfo.colors[0].gallery" class="pics__list">
-          <li class="pics__item">
+          <li
+            :key="photo.id"
+            v-for="photo in productInfo.colors"
+            class="pics__item"
+          >
             <a href="" class="pics__link pics__link--current">
               <img
+                :key="image.file.name"
+                v-for="image in photo.gallery"
                 width="98"
                 height="98"
-                src="img/product-square-2.jpg"
-                srcset="img/product-square-2@2x.jpg 2x"
-                alt="Название товара"
-              />
-            </a>
-          </li>
-          <li class="pics__item">
-            <a href="" class="pics__link">
-              <img
-                width="98"
-                height="98"
-                src="img/product-square-3.jpg"
-                srcset="img/product-square-3@2x.jpg 2x"
+                :src="image.file.url"
                 alt="Название товара"
               />
             </a>
@@ -84,7 +77,12 @@
                   </svg>
                 </button>
 
-                <input v-model="quantityOfGood" type="number" name="count" />
+                <input
+                  v-model="quantityOfGood"
+                  @change="checkQuantityOfGood"
+                  type="number"
+                  name="count"
+                />
 
                 <button
                   @click="addOneGood"
@@ -116,16 +114,17 @@
                   <li
                     :key="color.color.id"
                     :color="color"
-                    v-for="color in productInfo.colors"
+                    v-for="(color, index) in productInfo.colors"
                     class="colors__item"
                   >
                     <label class="colors__label">
                       <input
                         class="colors__radio sr-only"
                         type="radio"
+                        :checked="index === 0"
                         name="color"
-                        :value="color.color.id"
-                        @click="toggleColor"
+                        :value="color"
+                        v-model="colorActive"
                       />
                       <span
                         class="colors__value"
@@ -220,23 +219,28 @@ export default defineComponent({
     const $route = useRoute();
     const $store = useStore<IRootStore>();
 
-    let productInfo = ref<null | Record<string, unknown>>(null);
+    let productInfo = ref<null | any>(null);
 
     const productId = ref<number>(0);
     const sizeIdUser = ref<number>(0);
-    const colorIdUser = ref<number>(0);
+    const colorActive = ref<any | null>(
+      productInfo.value ? productInfo.value.colors[0] : null
+    );
     const quantityOfGood = ref<number>(1);
 
     const toggleSize = (ev: any) => {
       sizeIdUser.value = ev.target.value;
     };
-    const toggleColor = (ev: any) => {
-      colorIdUser.value = ev.target.value;
-    };
 
     const removeOneGood = () => {
       if (quantityOfGood.value > 1) {
         quantityOfGood.value = quantityOfGood.value - 1;
+      }
+    };
+
+    const checkQuantityOfGood = (ev: any) => {
+      if (ev.target.value < 1) {
+        quantityOfGood.value = 1;
       }
     };
 
@@ -247,7 +251,7 @@ export default defineComponent({
     const addProductInBasket = () => {
       if (
         productId.value &&
-        colorIdUser.value &&
+        colorActive.value &&
         sizeIdUser.value &&
         quantityOfGood.value &&
         localStorage.getItem("user_token")
@@ -256,7 +260,7 @@ export default defineComponent({
           .dispatch("basket/fetchAddProductInBasket", {
             information: {
               productId: String(productId.value),
-              colorId: String(colorIdUser.value),
+              colorId: String(colorActive.value.color.id),
               sizeId: String(sizeIdUser.value),
               quantity: String(quantityOfGood.value),
             } as IProductInBasket,
@@ -269,19 +273,22 @@ export default defineComponent({
     };
 
     getProductInfo(Number($route.params.id)).then((product) => {
+      console.log(product);
+      colorActive.value = product.colors[0];
       productInfo.value = product;
       productId.value = product.id;
       sizeIdUser.value = product.sizes[0].id;
     });
 
     return {
+      colorActive,
       productInfo,
       quantityOfGood,
 
       toggleSize,
-      toggleColor,
       addProductInBasket,
       removeOneGood,
+      checkQuantityOfGood,
       addOneGood,
     };
   },
