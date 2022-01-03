@@ -34,6 +34,12 @@ const routes: Array<RouteRecordRaw> = [
     name: "SuccessfulOrderPage",
     component: () => import("@/pages/SuccessfulOrderPage/index.vue"),
   },
+  // Страница с ошибкой
+  {
+    path: "/404",
+    name: "404",
+    component: () => import("@/pages/404/index.vue"),
+  },
 ];
 
 const router = createRouter({

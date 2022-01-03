@@ -27,6 +27,7 @@ const helperBasket = () => {
       return totalPrice + item.price * item.quantity;
     }, 0);
   });
+
   return {
     numberProductToBasket,
     numberProductToOrder,

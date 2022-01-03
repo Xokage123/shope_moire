@@ -1,5 +1,5 @@
 <template>
-  <ul class="catalog__pagination pagination">
+  <ul v-if="totalPage" class="catalog__pagination pagination">
     <li class="pagination__item">
       <button
         :disabled="actualPageNumber == 1"

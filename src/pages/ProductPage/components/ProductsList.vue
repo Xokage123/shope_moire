@@ -14,6 +14,7 @@
 import { defineComponent, ref, watch } from "vue";
 // Elements
 import ProductItem from "@/pages/ProductPage/components/ProductItem.vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   props: {
@@ -40,6 +41,7 @@ export default defineComponent({
         }
       }
     );
+
     return {
       actualListProducts,
 

@@ -6,7 +6,7 @@
         <legend class="form__legend">Цена</legend>
         <label class="form__label form__label--price">
           <input
-            v-model="priceFilter.end"
+            v-model="priceFilter.start"
             class="form__input"
             type="number"
             name="min-price"
@@ -15,7 +15,7 @@
         </label>
         <label class="form__label form__label--price">
           <input
-            v-model="priceFilter.start"
+            v-model="priceFilter.end"
             class="form__input"
             type="number"
             name="max-price"
@@ -52,11 +52,11 @@
           >
             <label class="check-list__label">
               <input
-                @click="addmaterialInList(material.id)"
                 :value="material.title"
                 class="check-list__check sr-only"
                 type="checkbox"
                 name="material"
+                v-model="actualMaterialsList"
               />
               <span class="check-list__desc">
                 {{ material.title }}
@@ -73,8 +73,8 @@
           <li :key="color.id" v-for="color in colorsList" class="colors__item">
             <label class="colors__label">
               <input
-                @click="addActualColor(color.id)"
-                :value="color.title"
+                v-model="actualColorsList"
+                :value="color.id"
                 class="colors__radio sr-only"
                 type="checkbox"
                 name="color"
@@ -101,11 +101,11 @@
           >
             <label class="check-list__label">
               <input
-                @click="addActualSeason(season.id)"
                 class="check-list__check sr-only"
                 type="checkbox"
                 name="collection"
                 :value="season.title"
+                v-model="actualSeasonsList"
               />
               <span class="check-list__desc">
                 {{ season.title }}
@@ -136,8 +136,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref } from "vue";
+import { defineComponent, onMounted, reactive, ref, watch } from "vue";
 import { useStore } from "vuex";
+import { useRoute, useRouter } from "vue-router";
 
 import type { IRootStore } from "@/store/types";
 import type { IProductsListProps } from "@/ITE/interface/product";
@@ -150,6 +151,8 @@ interface IPriceProps {
 export default defineComponent({
   name: "FilterComponent",
   setup() {
+    const $router = useRouter();
+    const $route = useRoute();
     const $store = useStore<IRootStore>();
 
     // Цена
@@ -158,51 +161,14 @@ export default defineComponent({
       end: 0,
     });
 
+    const queryRouteType = ref<string>(
+      $route.query.type ? ($route.query.type as string) : ""
+    );
+
     const actualCategoryId = ref<number | null>(null);
-
     const actualSeasonsList = ref<Array<number>>([]);
-    const addActualSeason = (id: number) => {
-      const check = actualSeasonsList.value.some((arrayId) => {
-        return arrayId === id;
-      });
-      if (check) {
-        actualSeasonsList.value = actualSeasonsList.value.filter((arrayId) => {
-          return arrayId !== id;
-        });
-      } else {
-        actualSeasonsList.value.push(id);
-      }
-    };
-
     const actualMaterialsList = ref<Array<number>>([]);
-    const addmaterialInList = (id: number) => {
-      const check = actualMaterialsList.value.some((arrayId) => {
-        return arrayId === id;
-      });
-      if (check) {
-        actualMaterialsList.value = actualMaterialsList.value.filter(
-          (arrayId) => {
-            return arrayId !== id;
-          }
-        );
-      } else {
-        actualMaterialsList.value.push(id);
-      }
-    };
-
     const actualColorsList = ref<Array<number>>([]);
-    const addActualColor = (id: number) => {
-      const check = actualColorsList.value.some((colorId) => {
-        return colorId === id;
-      });
-      if (check) {
-        actualColorsList.value = actualColorsList.value.filter((colorId) => {
-          return colorId !== id;
-        });
-      } else {
-        actualColorsList.value.push(id);
-      }
-    };
 
     const categoryList = ref($store.state.filters.categoriesProduct);
     const seasonsList = ref($store.state.filters.seasonsList);
@@ -211,11 +177,30 @@ export default defineComponent({
 
     // Применение фильтров
     const applyFilter = () => {
-      if (actualCategoryId.value) {
+      let actualTypeId = actualCategoryId.value;
+
+      if (queryRouteType.value && !actualCategoryId.value) {
+        const actualType: any = categoryList.value.find((type: any) => {
+          return type.title === queryRouteType.value;
+        });
+
+        actualTypeId = actualType.id;
+
+        actualCategoryId.value = actualTypeId;
+      } else {
+        if ($route.query.type) {
+          $router.push({
+            name: "ProductsPage",
+            query: {},
+          });
+        }
+      }
+
+      if (actualTypeId) {
         const filter: IProductsListProps = {
-          minPrice: priceFilter.start,
-          maxPrice: priceFilter.end,
-          categoryId: actualCategoryId.value,
+          minPrice: priceFilter.end,
+          maxPrice: priceFilter.start,
+          categoryId: actualTypeId,
           materialIds: actualMaterialsList.value,
           colorIds: actualColorsList.value,
           seasonIds: actualSeasonsList.value,
@@ -225,17 +210,47 @@ export default defineComponent({
           numberPage: 1,
           filtersObject: filter,
         });
+      } else {
+        $store.dispatch("products/loadListProduct", {
+          numberPage: 1,
+        });
       }
     };
-    // Очистка фильтра
+
     const clearFilters = () => {
-      priceFilter.start = 0;
-      priceFilter.end = 0;
       actualCategoryId.value = null;
       actualSeasonsList.value = [];
       actualMaterialsList.value = [];
       actualColorsList.value = [];
+      $store.dispatch("products/loadListProduct", {
+        numberPage: 1,
+      });
     };
+
+    if (queryRouteType.value && categoryList.value.length) {
+      applyFilter();
+    }
+
+    watch(
+      () => priceFilter.start,
+      (newValue) => {
+        if (newValue < 0) priceFilter.start = 0;
+      }
+    );
+
+    watch(
+      () => priceFilter.end,
+      (newValue) => {
+        if (newValue < 0) priceFilter.end = 0;
+      }
+    );
+
+    watch(
+      () => categoryList.value,
+      () => {
+        applyFilter();
+      }
+    );
 
     onMounted(() => {
       if (!$store.state.filters.categoriesProduct.length) {
@@ -250,12 +265,10 @@ export default defineComponent({
           seasonsList.value = seasons;
         });
       }
-      if (!$store.state.filters.materialList.length) {
-        // Получаем актуальные материалы
-        $store.dispatch("filters/loadMaterial").then((materials) => {
-          materialsList.value = materials;
-        });
-      }
+      // Получаем актуальные материалы
+      $store.dispatch("filters/loadMaterial").then((materials) => {
+        materialsList.value = materials;
+      });
       if (!$store.state.filters.colorsList.length) {
         // Получаем актуальные цвета
         $store.dispatch("filters/loadColors").then((сolors) => {
@@ -271,16 +284,14 @@ export default defineComponent({
       priceFilter,
 
       categoryList,
-      actualCategoryId,
-
       seasonsList,
-      addActualSeason,
-
       materialsList,
-      addmaterialInList,
-
       colorsList,
-      addActualColor,
+
+      actualCategoryId,
+      actualSeasonsList,
+      actualMaterialsList,
+      actualColorsList,
     };
   },
 });
@@ -293,6 +304,11 @@ export default defineComponent({
       width: 20px;
       height: 20px;
     }
+  }
+}
+.colors {
+  &__value {
+    border: 1px solid black;
   }
 }
 </style>

@@ -19,7 +19,7 @@ export interface IOrderInformation {
 
 export interface IBasketStore {
   id: number;
-  items: Array<unknown>;
+  items: Array<any>;
   order: null | Record<string, any>;
   deliveries: IDeliveries[];
   payments: IPayments[];

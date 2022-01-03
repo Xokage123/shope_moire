@@ -11,9 +11,16 @@
           </router-link>
         </li>
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="#">
+          <router-link
+            :to="{
+              name: 'ProductsPage',
+              query: {
+                type: productInfo.category.title,
+              },
+            }"
+          >
             {{ productInfo.category.title }}
-          </a>
+          </router-link>
         </li>
         <li class="breadcrumbs__item">
           <a class="breadcrumbs__link"> {{ productInfo.title }} </a>
@@ -37,16 +44,19 @@
             v-for="photo in productInfo.colors"
             class="pics__item"
           >
-            <a href="" class="pics__link pics__link--current">
-              <img
-                :key="image.file.name"
-                v-for="image in photo.gallery"
-                width="98"
-                height="98"
-                :src="image.file.url"
-                alt="Название товара"
-              />
-            </a>
+            <img
+              :key="image.file.name"
+              class="pics__link"
+              :class="{
+                'pics__link--current': photo.color.id === colorActive.color.id,
+              }"
+              v-for="image in photo.gallery"
+              @click="colorActive = photo"
+              width="98"
+              height="98"
+              :src="image.file.url"
+              alt="Название товара"
+            />
           </li>
         </ul>
       </div>
@@ -104,7 +114,9 @@
                 </button>
               </div>
 
-              <b class="item__price"> {{ productInfo.price }} ₽ </b>
+              <b class="item__price">
+                {{ productInfo.price * quantityOfGood }} ₽
+              </b>
             </div>
 
             <div class="item__row">
@@ -201,25 +213,39 @@
     </section>
   </div>
   <div v-else>Подождите, идет загрузка...</div>
+  <ModalComponent :show="showAddModal">
+    Товар добавляется в козину, подождите
+  </ModalComponent>
+  <ModalComponent :show="showSuccessAddModal">
+    Товар успешно добавлен в корзину!
+  </ModalComponent>
 </template>
 
 <script lang="ts">
-// Vue
 import { defineComponent, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
-// API
+
+import ModalComponent from "@/components/Modal.vue";
+
 import { getProductInfo } from "@/api/index";
-// Type
+
 import type { IRootStore } from "@/store/types";
 import { IProductInBasket } from "@/ITE/interface/product";
 
 export default defineComponent({
+  components: {
+    ModalComponent,
+  },
   setup() {
     const $route = useRoute();
+    const $router = useRouter();
     const $store = useStore<IRootStore>();
 
-    let productInfo = ref<null | any>(null);
+    const showAddModal = ref<boolean>(false);
+    const showSuccessAddModal = ref<boolean>(false);
+
+    const productInfo = ref<null | any>(null);
 
     const productId = ref<number>(0);
     const sizeIdUser = ref<number>(0);
@@ -256,6 +282,7 @@ export default defineComponent({
         quantityOfGood.value &&
         localStorage.getItem("user_token")
       ) {
+        showAddModal.value = true;
         $store
           .dispatch("basket/fetchAddProductInBasket", {
             information: {
@@ -266,24 +293,45 @@ export default defineComponent({
             } as IProductInBasket,
             token: localStorage.getItem("user_token"),
           })
-          .then((res) => {
-            console.log(res);
+          .then(() => {
+            showSuccessAddModal.value = true;
+
+            setTimeout(() => {
+              showSuccessAddModal.value = false;
+            }, 3000);
+          })
+          .catch(() => {
+            $router.push({
+              name: "404",
+            });
+          })
+          .finally(() => {
+            quantityOfGood.value = 1;
+            showAddModal.value = false;
           });
       }
     };
 
-    getProductInfo(Number($route.params.id)).then((product) => {
-      console.log(product);
-      colorActive.value = product.colors[0];
-      productInfo.value = product;
-      productId.value = product.id;
-      sizeIdUser.value = product.sizes[0].id;
-    });
+    getProductInfo(Number($route.params.id))
+      .then((product) => {
+        colorActive.value = product.colors[0];
+        productInfo.value = product;
+        productId.value = product.id;
+        sizeIdUser.value = product.sizes[0].id;
+      })
+      .catch(() => {
+        $router.push({
+          name: "404",
+        });
+      });
 
     return {
       colorActive,
       productInfo,
       quantityOfGood,
+
+      showAddModal,
+      showSuccessAddModal,
 
       toggleSize,
       addProductInBasket,
@@ -299,6 +347,12 @@ export default defineComponent({
 .colors {
   &__value {
     border: 1px solid black;
+  }
+}
+
+.pics {
+  &__link {
+    cursor: pointer;
   }
 }
 </style>

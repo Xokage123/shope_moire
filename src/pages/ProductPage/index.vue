@@ -39,27 +39,17 @@ export default defineComponent({
   },
   setup() {
     const $store = useStore<IRootStore>();
-    // Изначально у нас открыта первая страница
+
     let numberPage = ref<number>(1);
 
-    const listProduct = ref<Array<unknown>>([]);
-
-    $store
-      .dispatch("products/loadListProduct", numberPage.value)
-      .then((products) => {
-        listProduct.value = products.items;
-      });
+    const listProduct = ref<Array<unknown>>($store.state.products.listProducts);
 
     watch(
       () => numberPage.value,
       (newNumberPage) => {
-        $store
-          .dispatch("products/loadListProduct", {
-            numberPage: newNumberPage,
-          })
-          .then((products) => {
-            listProduct.value = products.items;
-          });
+        $store.dispatch("products/loadListProduct", {
+          numberPage: newNumberPage,
+        });
       }
     );
 

@@ -2,6 +2,7 @@
   <Header />
   <main class="content container">
     <router-view />
+    <div id="modal"></div>
   </main>
   <Fotter />
 </template>

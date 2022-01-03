@@ -10,9 +10,8 @@
         }"
       >
         <img
-          v-if="product.colors[0].gallery"
           class="catalog__image"
-          :src="product.colors[0].gallery[0].file.url"
+          :src="actualPhotoLink"
           alt="Название товара"
         />
       </router-link>
@@ -27,8 +26,7 @@
       <ul class="colors colors--black">
         <li
           :key="color.id"
-          :color="color"
-          v-for="color in product.colors"
+          v-for="(color, index) in product.colors"
           class="colors__item"
         >
           <label class="colors__label">
@@ -36,8 +34,8 @@
               class="colors__radio sr-only"
               type="radio"
               name="color-1"
-              :value="color.color.code"
-              checked=""
+              @input="togglePhoto(color)"
+              :checked="index === 0"
             />
             <span
               class="colors__value"
@@ -55,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   props: {
@@ -64,7 +62,20 @@ export default defineComponent({
     },
   },
   setup(props) {
-    console.log(props.product);
+    const actualPhotoLink = ref<string>(
+      props.product && props.product.colors[0].gallery
+        ? props.product.colors[0].gallery[0].file.url
+        : ""
+    );
+
+    const togglePhoto = (colorInfo: any) => {
+      actualPhotoLink.value = colorInfo.gallery[0].file.url;
+    };
+
+    return {
+      actualPhotoLink,
+      togglePhoto,
+    };
   },
 });
 </script>

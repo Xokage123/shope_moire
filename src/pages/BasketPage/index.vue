@@ -33,7 +33,7 @@
           >
             <div class="product__pic">
               <img
-                :src="product.product.colors[0].gallery[0].file.url"
+                :src="addPhoto(product)"
                 width="120"
                 height="120"
                 alt="Название товара"
@@ -46,6 +46,7 @@
                 <i
                   :style="{
                     backgroundColor: product.color.color.code,
+                    border: '1px solid black',
                   }"
                 ></i>
                 {{ product.color.color.title }}
@@ -58,7 +59,7 @@
                 @click="
                   toggleProductInBasket(
                     product.id,
-                    product.quantity > 0
+                    product.quantity > 1
                       ? product.quantity - 1
                       : product.quantity
                   )
@@ -80,7 +81,19 @@
                 </svg>
               </button>
 
-              <input type="text" v-model="product.quantity" name="count" />
+              <input
+                type="number"
+                @change="
+                  (ev) => {
+                    if (+ev.target.value < 1) {
+                      toggleProductInBasket(product.id, 1);
+                    }
+                    toggleProductInBasket(product.id, product.quantity);
+                  }
+                "
+                v-model="product.quantity"
+                name="count"
+              />
 
               <button
                 @click="toggleProductInBasket(product.id, product.quantity + 1)"
@@ -148,6 +161,13 @@
         </button>
       </div>
     </form>
+    <ModalComponent :show="showDeleteModal">
+      Товар удаляется, подождите
+    </ModalComponent>
+
+    <ModalComponent :show="showToogleModal">
+      Идет изменения количества товаров, подождите
+    </ModalComponent>
   </section>
 </template>
 
@@ -156,17 +176,31 @@ import { defineComponent, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
+import ModalComponent from "@/components/Modal.vue";
+
 import type { IRootStore } from "@/store/types";
 
 import helperBasket from "@/helpers/basket";
 
 export default defineComponent({
+  components: {
+    ModalComponent,
+  },
   setup: () => {
     const $store = useStore<IRootStore>();
     const $router = useRouter();
 
     const productsBasket = ref($store.state.basket.items);
 
+    const showDeleteModal = ref<boolean>(false);
+    const showToogleModal = ref<boolean>(false);
+
+    const addPhoto = (item: any): string => {
+      const actualColorInfo = item.product.colors.find(
+        (color: any) => color.id === item.color.id
+      );
+      return actualColorInfo.gallery[0].file.url;
+    };
     const { numberProductToBasket, totalPrice } = helperBasket();
 
     const goToCheckoutPage = () => {
@@ -177,21 +211,31 @@ export default defineComponent({
 
     const toggleProductInBasket = (id: number, quantity: number) => {
       if (quantity) {
-        $store.dispatch("basket/fetchToggleAmount", {
-          token: localStorage.getItem("user_token"),
-          information: {
-            basketItemId: id,
-            quantity,
-          },
-        });
+        showToogleModal.value = true;
+        $store
+          .dispatch("basket/fetchToggleAmount", {
+            token: localStorage.getItem("user_token"),
+            information: {
+              basketItemId: id,
+              quantity,
+            },
+          })
+          .finally(() => {
+            showToogleModal.value = false;
+          });
       }
     };
 
     const removeProductInBasket = (id: string) => {
-      $store.dispatch("basket/fetchRemoveProduct", {
-        token: localStorage.getItem("user_token"),
-        id,
-      });
+      showDeleteModal.value = true;
+      $store
+        .dispatch("basket/fetchRemoveProduct", {
+          token: localStorage.getItem("user_token"),
+          id,
+        })
+        .finally(() => {
+          showDeleteModal.value = false;
+        });
     };
 
     watch(
@@ -208,6 +252,11 @@ export default defineComponent({
 
       numberProductToBasket,
       totalPrice,
+
+      addPhoto,
+
+      showDeleteModal,
+      showToogleModal,
 
       goToCheckoutPage,
     };
