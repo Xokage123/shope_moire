@@ -34,16 +34,33 @@
           <img
             width="570"
             height="570"
-            :src="colorActive.gallery[0].file.url"
+            :src="
+              colorActive.gallery
+                ? colorActive.gallery[0].file.url
+                : NoProductPhoto
+            "
             alt="Название товара"
           />
         </div>
-        <ul v-if="productInfo.colors[0].gallery" class="pics__list">
+        <ul class="pics__list">
           <li
             :key="photo.id"
             v-for="photo in productInfo.colors"
             class="pics__item"
           >
+            <img
+              v-if="!photo.gallery"
+              class="pics__link"
+              :class="{
+                'pics__link--current': photo.color.id === colorActive.color.id,
+              }"
+              @click="colorActive = photo"
+              width="98"
+              height="98"
+              :src="NoProductPhoto"
+              alt="Название товара"
+            />
+
             <img
               :key="image.file.name"
               class="pics__link"
@@ -228,6 +245,8 @@ import { getOnlyPositiveNumber } from "@/utils/index";
 import type { IRootStore } from "@/store/types";
 import { IProductInBasket } from "@/ITE/interface/product";
 
+import NoProductPhoto from "@/assets/image/no-photo-product.jpeg";
+
 export default defineComponent({
   components: {},
   setup() {
@@ -319,6 +338,8 @@ export default defineComponent({
       removeOneGood,
       checkQuantityOfGood,
       addOneGood,
+
+      NoProductPhoto,
     };
   },
 });

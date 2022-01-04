@@ -111,8 +111,6 @@ export default defineComponent({
 
     const orderInfo = ref($store.state.basket.order);
 
-    console.log(orderInfo.value);
-
     if (!orderInfo.value) {
       $router.push({
         name: "ProductsPage",

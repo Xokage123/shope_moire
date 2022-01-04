@@ -178,6 +178,8 @@ import { getOnlyPositiveNumber } from "@/utils/index";
 
 import helperBasket from "@/helpers/basket";
 
+import NoProductPhoto from "@/assets/image/no-photo-product.jpeg";
+
 export default defineComponent({
   components: {},
   setup: () => {
@@ -193,7 +195,9 @@ export default defineComponent({
       const actualColorInfo = item.product.colors.find(
         (color: any) => color.id === item.color.id
       );
-      return actualColorInfo.gallery[0].file.url;
+      return actualColorInfo.gallery
+        ? actualColorInfo.gallery[0].file.url
+        : NoProductPhoto;
     };
     const { numberProductToBasket, totalPrice } = helperBasket();
 
