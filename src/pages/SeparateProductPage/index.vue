@@ -90,7 +90,7 @@
                 <input
                   v-model="quantityOfGood"
                   @change="checkQuantityOfGood"
-                  type="number"
+                  type="text"
                   name="count"
                 />
 
@@ -114,7 +114,7 @@
                 </button>
               </div>
 
-              <b class="item__price">
+              <b v-if="+quantityOfGood" class="item__price">
                 {{ productInfo.price * quantityOfGood }} ₽
               </b>
             </div>
@@ -213,37 +213,30 @@
     </section>
   </div>
   <div v-else>Подождите, идет загрузка...</div>
-  <ModalComponent :show="showAddModal">
-    Товар добавляется в козину, подождите
-  </ModalComponent>
-  <ModalComponent :show="showSuccessAddModal">
-    Товар успешно добавлен в корзину!
-  </ModalComponent>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
-
-import ModalComponent from "@/components/Modal.vue";
+import { createToaster } from "@meforma/vue-toaster";
 
 import { getProductInfo } from "@/api/index";
+
+import { getOnlyPositiveNumber } from "@/utils/index";
 
 import type { IRootStore } from "@/store/types";
 import { IProductInBasket } from "@/ITE/interface/product";
 
 export default defineComponent({
-  components: {
-    ModalComponent,
-  },
+  components: {},
   setup() {
     const $route = useRoute();
     const $router = useRouter();
     const $store = useStore<IRootStore>();
-
-    const showAddModal = ref<boolean>(false);
-    const showSuccessAddModal = ref<boolean>(false);
+    const toaster = createToaster({
+      duration: 2000,
+    });
 
     const productInfo = ref<null | any>(null);
 
@@ -265,9 +258,7 @@ export default defineComponent({
     };
 
     const checkQuantityOfGood = (ev: any) => {
-      if (ev.target.value < 1) {
-        quantityOfGood.value = 1;
-      }
+      quantityOfGood.value = getOnlyPositiveNumber(+ev.target.value);
     };
 
     const addOneGood = () => {
@@ -282,7 +273,7 @@ export default defineComponent({
         quantityOfGood.value &&
         localStorage.getItem("user_token")
       ) {
-        showAddModal.value = true;
+        toaster.info("Подождите, товар добавляется в корзину");
         $store
           .dispatch("basket/fetchAddProductInBasket", {
             information: {
@@ -294,20 +285,13 @@ export default defineComponent({
             token: localStorage.getItem("user_token"),
           })
           .then(() => {
-            showSuccessAddModal.value = true;
-
-            setTimeout(() => {
-              showSuccessAddModal.value = false;
-            }, 3000);
+            toaster.success(`Товар успешно добавлен в корзину`);
           })
           .catch(() => {
+            toaster.error(`Извините, нам не удалось добавить товар в корзину`);
             $router.push({
               name: "404",
             });
-          })
-          .finally(() => {
-            quantityOfGood.value = 1;
-            showAddModal.value = false;
           });
       }
     };
@@ -329,9 +313,6 @@ export default defineComponent({
       colorActive,
       productInfo,
       quantityOfGood,
-
-      showAddModal,
-      showSuccessAddModal,
 
       toggleSize,
       addProductInBasket,

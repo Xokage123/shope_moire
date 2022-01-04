@@ -72,6 +72,7 @@ export const addProductToBasket = async (
     },
     data: productInformation,
   });
+
   return basket.data;
 };
 // Изменить количество товара в корзине по идентификатору его позиции в корзине
@@ -90,6 +91,7 @@ export const toggleProductToBasket = async (
     },
     data: productInformation,
   });
+
   return basket.data;
 };
 // Удалить товар из корзины

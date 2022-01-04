@@ -82,16 +82,16 @@
               </button>
 
               <input
-                type="number"
+                type="text"
                 @change="
                   (ev) => {
-                    if (+ev.target.value < 1) {
-                      toggleProductInBasket(product.id, 1);
-                    }
-                    toggleProductInBasket(product.id, product.quantity);
+                    toggleProductInBasket(
+                      product.id,
+                      getOnlyPositiveNumber(+ev.target.value)
+                    );
                   }
                 "
-                v-model="product.quantity"
+                :value="product.quantity"
                 name="count"
               />
 
@@ -121,7 +121,7 @@
 
             <button
               @click="removeProductInBasket(product.id)"
-              class="product__del button-del"
+              class="product__del button-del pointer"
               type="button"
               aria-label="Удалить товар из корзины"
             >
@@ -156,18 +156,13 @@
           :disabled="!numberProductToBasket"
           class="cart__button button button--primery"
           type="submit"
+          @click="showSuccess()"
         >
           Оформить заказ
         </button>
       </div>
     </form>
-    <ModalComponent :show="showDeleteModal">
-      Товар удаляется, подождите
-    </ModalComponent>
-
-    <ModalComponent :show="showToogleModal">
-      Идет изменения количества товаров, подождите
-    </ModalComponent>
+    <NotificationSuccessComponent />
   </section>
 </template>
 
@@ -175,25 +170,24 @@
 import { defineComponent, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-
-import ModalComponent from "@/components/Modal.vue";
+import { createToaster } from "@meforma/vue-toaster";
 
 import type { IRootStore } from "@/store/types";
+
+import { getOnlyPositiveNumber } from "@/utils/index";
 
 import helperBasket from "@/helpers/basket";
 
 export default defineComponent({
-  components: {
-    ModalComponent,
-  },
+  components: {},
   setup: () => {
     const $store = useStore<IRootStore>();
     const $router = useRouter();
+    const toaster = createToaster({
+      duration: 2000,
+    });
 
     const productsBasket = ref($store.state.basket.items);
-
-    const showDeleteModal = ref<boolean>(false);
-    const showToogleModal = ref<boolean>(false);
 
     const addPhoto = (item: any): string => {
       const actualColorInfo = item.product.colors.find(
@@ -204,6 +198,7 @@ export default defineComponent({
     const { numberProductToBasket, totalPrice } = helperBasket();
 
     const goToCheckoutPage = () => {
+      toaster.info(`Подождите, идет переход на страницу оформления заказа`);
       $router.push({
         name: "CheckoutOrderPage",
       });
@@ -211,7 +206,7 @@ export default defineComponent({
 
     const toggleProductInBasket = (id: number, quantity: number) => {
       if (quantity) {
-        showToogleModal.value = true;
+        toaster.info(`Подождите, количество товара изменяется`);
         $store
           .dispatch("basket/fetchToggleAmount", {
             token: localStorage.getItem("user_token"),
@@ -220,21 +215,29 @@ export default defineComponent({
               quantity,
             },
           })
-          .finally(() => {
-            showToogleModal.value = false;
+          .then(() => {
+            toaster.success(`Количество товара успешно изменено`);
+          })
+          .catch(() => {
+            toaster.error(
+              `Не удалось изменить количество товар, попробуй позже`
+            );
           });
       }
     };
 
     const removeProductInBasket = (id: string) => {
-      showDeleteModal.value = true;
+      toaster.info(`Подождите, товар удаляется`);
       $store
         .dispatch("basket/fetchRemoveProduct", {
           token: localStorage.getItem("user_token"),
           id,
         })
-        .finally(() => {
-          showDeleteModal.value = false;
+        .then(() => {
+          toaster.success(`Товар успешно удален`);
+        })
+        .catch(() => {
+          toaster.error(`Не удалось удалить товар, попробуй позже`);
         });
     };
 
@@ -255,8 +258,7 @@ export default defineComponent({
 
       addPhoto,
 
-      showDeleteModal,
-      showToogleModal,
+      getOnlyPositiveNumber,
 
       goToCheckoutPage,
     };

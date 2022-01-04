@@ -165,7 +165,7 @@ export default defineComponent({
       $route.query.type ? ($route.query.type as string) : ""
     );
 
-    const actualCategoryId = ref<number | null>(null);
+    const actualCategoryId = ref<number>(0);
     const actualSeasonsList = ref<Array<number>>([]);
     const actualMaterialsList = ref<Array<number>>([]);
     const actualColorsList = ref<Array<number>>([]);
@@ -196,29 +196,23 @@ export default defineComponent({
         }
       }
 
-      if (actualTypeId) {
-        const filter: IProductsListProps = {
-          minPrice: priceFilter.end,
-          maxPrice: priceFilter.start,
-          categoryId: actualTypeId,
-          materialIds: actualMaterialsList.value,
-          colorIds: actualColorsList.value,
-          seasonIds: actualSeasonsList.value,
-        };
+      const filter: IProductsListProps = {
+        minPrice: priceFilter.end,
+        maxPrice: priceFilter.start,
+        categoryId: actualTypeId,
+        materialIds: actualMaterialsList.value,
+        colorIds: actualColorsList.value,
+        seasonIds: actualSeasonsList.value,
+      };
 
-        $store.dispatch("products/loadListProduct", {
-          numberPage: 1,
-          filtersObject: filter,
-        });
-      } else {
-        $store.dispatch("products/loadListProduct", {
-          numberPage: 1,
-        });
-      }
+      $store.dispatch("products/loadListProduct", {
+        numberPage: 1,
+        filtersObject: filter,
+      });
     };
 
     const clearFilters = () => {
-      actualCategoryId.value = null;
+      actualCategoryId.value = 0;
       actualSeasonsList.value = [];
       actualMaterialsList.value = [];
       actualColorsList.value = [];

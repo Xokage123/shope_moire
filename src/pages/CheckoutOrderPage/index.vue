@@ -37,55 +37,80 @@
         <div class="cart__data">
           <label class="form__label">
             <input
-              v-model="initialUser"
+              v-model="initialUser.value"
               class="form__input"
+              :class="{
+                form__input_error: initialUser.error,
+              }"
               type="text"
               name="name"
               placeholder="Введите ваше полное имя"
             />
             <span class="form__value">ФИО</span>
-          </label>
-
-          <label class="form__label">
-            <input
-              v-model="addressUser"
-              class="form__input"
-              type="text"
-              name="address"
-              placeholder="Введите ваш адрес"
-            />
-            <span class="form__value">Адрес доставки</span>
-          </label>
-
-          <label class="form__label">
-            <input
-              v-model="phoneUser"
-              @input="changePhone"
-              class="form__input"
-              type="tel"
-              name="phone"
-              placeholder="Введите ваш телефон"
-            />
-            <span class="form__value">Телефон</span>
-            <span v-if="checkPhone" class="form__error">
-              Неверный формат телефона
+            <span v-if="initialUser.error" class="form__error">
+              Данное поле является обязательным
             </span>
           </label>
 
           <label class="form__label">
             <input
-              v-model="emailUser"
+              v-model="addressUser.value"
               class="form__input"
+              :class="{
+                form__input_error: addressUser.error,
+              }"
+              type="text"
+              name="address"
+              placeholder="Введите ваш адрес"
+            />
+            <span class="form__value">Адрес доставки</span>
+            <span v-if="addressUser.error" class="form__error">
+              Данное поле является обязательным
+            </span>
+          </label>
+
+          <label class="form__label">
+            <input
+              v-model="phoneUser.value"
+              @input="changePhone"
+              class="form__input"
+              :class="{
+                form__input_error: checkPhone || phoneUser.error,
+              }"
+              type="tel"
+              name="phone"
+              placeholder="Введите ваш телефон"
+            />
+            <span class="form__value">Телефон</span>
+            <span v-if="checkPhone || phoneUser.error" class="form__error">
+              {{
+                phoneUser.error
+                  ? "Данное поле является обязательным"
+                  : "Неверный формат телефона"
+              }}
+            </span>
+          </label>
+
+          <label class="form__label">
+            <input
+              v-model="emailUser.value"
+              class="form__input"
+              :class="{
+                form__input_error: emailUser.error,
+              }"
               type="email"
               name="email"
               placeholder="Введи ваш Email"
             />
             <span class="form__value">Email</span>
+            <span v-if="emailUser.error" class="form__error">
+              Данное поле является обязательным
+            </span>
           </label>
 
           <label class="form__label">
             <textarea
-              v-model="messageUser"
+              v-model="messageUser.value"
               class="form__input form__input--area"
               name="comments"
               placeholder="Ваши пожелания"
@@ -179,11 +204,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, watch } from "vue";
+import { defineComponent, onMounted, reactive, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
 import helperBasket from "@/helpers/basket";
+
+import type { InputProps } from "@/ITE/interface/basket";
 
 import type { IRootStore } from "@/store/types";
 import type {
@@ -220,12 +247,28 @@ export default defineComponent({
         });
     };
 
-    const initialUser = ref<string>("");
-    const addressUser = ref<string>("");
-    const phoneUser = ref<string>("");
+    const initialUser = reactive<InputProps>({
+      value: "",
+      error: false,
+    });
+
+    const addressUser = reactive<InputProps>({
+      value: "",
+      error: false,
+    });
+    const phoneUser = reactive<InputProps>({
+      value: "",
+      error: false,
+    });
     const checkPhone = ref<boolean>(false);
-    const emailUser = ref<string>("");
-    const messageUser = ref<string>("");
+    const emailUser = reactive<InputProps>({
+      value: "",
+      error: false,
+    });
+    const messageUser = reactive<InputProps>({
+      value: "",
+      error: false,
+    });
 
     const changePhone = (ev: any) => {
       const value = ev.target.value as string;
@@ -269,6 +312,7 @@ export default defineComponent({
             information,
           })
           .then(() => {
+            removeAllErrors();
             localStorage.setItem("user_token", "");
             $router.push({
               name: "SuccessfulOrderPage",
@@ -277,10 +321,22 @@ export default defineComponent({
       } else {
         checkError.value = true;
 
+        initialUser.error = !initialUser.value ? true : false;
+        addressUser.error = !addressUser.value ? true : false;
+        phoneUser.error = !phoneUser.value ? true : false;
+        emailUser.error = !emailUser.value ? true : false;
+
         setTimeout(() => {
           checkError.value = false;
         }, 3000);
       }
+    };
+
+    const removeAllErrors = () => {
+      initialUser.error = false;
+      addressUser.error = false;
+      phoneUser.error = false;
+      emailUser.error = false;
     };
 
     watch(
@@ -322,3 +378,16 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.form {
+  &__label {
+    text-align: start;
+  }
+  &__input {
+    &_error {
+      border: 1px solid red;
+    }
+  }
+}
+</style>
