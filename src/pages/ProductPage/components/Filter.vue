@@ -32,6 +32,7 @@
             class="form__select"
             name="category"
           >
+            <option value="0" label="Все категории" />
             <option
               :key="category.id"
               :label="category.title"
@@ -52,7 +53,7 @@
           >
             <label class="check-list__label">
               <input
-                :value="material.title"
+                :value="material.id"
                 class="check-list__check sr-only"
                 type="checkbox"
                 name="material"
