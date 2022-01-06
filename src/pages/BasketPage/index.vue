@@ -39,7 +39,13 @@
                 alt="Название товара"
               />
             </div>
-            <h3 class="product__title">{{ product.product.title }}</h3>
+            <div>
+              <h3 class="product__title">{{ product.product.title }}</h3>
+              <span class="product__code"
+                >Размер: {{ product.size.title }}</span
+              >
+            </div>
+
             <p class="product__info product__info--color">
               Цвет:
               <span>
@@ -52,6 +58,7 @@
                 {{ product.color.color.title }}
               </span>
             </p>
+
             <span class="product__code"> Артикул: {{ product.id }} </span>
 
             <div class="product__counter form__counter">
@@ -182,6 +189,7 @@ import NoProductPhoto from "@/assets/image/no-photo-product.jpeg";
 
 export default defineComponent({
   components: {},
+
   setup: () => {
     const $store = useStore<IRootStore>();
     const $router = useRouter();
@@ -249,6 +257,7 @@ export default defineComponent({
       () => $store.state.basket.items,
       (newValue) => {
         productsBasket.value = newValue;
+        console.log(productsBasket.value);
       }
     );
 

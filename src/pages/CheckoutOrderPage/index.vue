@@ -247,7 +247,6 @@ export default defineComponent({
       $store
         .dispatch("basket/fetchAddPayment", delivery.id)
         .then((listPayment) => {
-          console.log(listPayment);
           actualPaymentId.value = listPayment[0].id;
           payments.value = listPayment;
         });
@@ -354,7 +353,6 @@ export default defineComponent({
 
     onMounted(() => {
       $store.dispatch("basket/fetchAddDeliveries").then((res) => {
-        console.log(res);
         definePayment(res[0]);
         deliveries.value = res;
       });
