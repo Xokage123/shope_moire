@@ -16,9 +16,7 @@
           <a class="footer__link" href="tel:88006009009"> 8 800 600 90 09 </a>
         </li>
         <li>
-          <a class="footer__link" href="mailto:hi@technozavrrr.com">
-            hi@technozavrrr.com
-          </a>
+          <a class="footer__link" href="mailto:hi@moire.com"> hi@moire.com </a>
         </li>
         <li>
           <a class="footer__link" href="#"> Распродажа </a>
