@@ -134,6 +134,7 @@
                   @input="definePayment(delivery)"
                   name="delivery"
                   :value="delivery.id"
+                  :checked="actualDeliveryId === delivery.id"
                 />
                 <span class="options__value">
                   {{ delivery.title }} <b>{{ delivery.price }} ₽</b>
@@ -156,8 +157,9 @@
                   type="radio"
                   name="pay"
                   :value="payment.id"
+                  :checked="actualPaymentId === payment.id"
                 />
-                <span class="options__value"> Картой при получении </span>
+                <span class="options__value"> {{ payment.title }} </span>
               </label>
             </li>
           </ul>
@@ -234,15 +236,19 @@ export default defineComponent({
 
     const payments = ref<IPayments[]>($store.state.basket.payments);
     const actualPaymentId = ref<number>(0);
+
     const toggleActualPaymentId = (id: number) => {
       actualPaymentId.value = id;
     };
+
     const definePayment = (delivery: IDeliveries) => {
       actualDeliveryId.value = delivery.id;
       actualDelivery.value = delivery;
       $store
         .dispatch("basket/fetchAddPayment", delivery.id)
         .then((listPayment) => {
+          console.log(listPayment);
+          actualPaymentId.value = listPayment[0].id;
           payments.value = listPayment;
         });
     };
@@ -348,6 +354,8 @@ export default defineComponent({
 
     onMounted(() => {
       $store.dispatch("basket/fetchAddDeliveries").then((res) => {
+        console.log(res);
+        definePayment(res[0]);
         deliveries.value = res;
       });
     });
@@ -363,6 +371,7 @@ export default defineComponent({
       checkoutBasketForm,
 
       payments,
+      actualPaymentId,
       toggleActualPaymentId,
       definePayment,
 
@@ -372,6 +381,7 @@ export default defineComponent({
 
       deliveries,
       actualDelivery,
+      actualDeliveryId,
 
       checkError,
     };
