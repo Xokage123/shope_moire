@@ -105,7 +105,7 @@
                 class="check-list__check sr-only"
                 type="checkbox"
                 name="collection"
-                :value="season.title"
+                :value="season.id"
                 v-model="actualSeasonsList"
               />
               <span class="check-list__desc">

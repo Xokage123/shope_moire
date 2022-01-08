@@ -144,7 +144,7 @@
         </li>
       </ul>
 
-      <span class="footer__copyright"> © 2020 Moire </span>
+      <span class="footer__copyright"> © 2022 Moire </span>
     </div>
   </footer>
 </template>
