@@ -215,13 +215,29 @@ export default defineComponent({
     };
 
     const clearFilters = () => {
+      priceFilter.start = 0;
+      priceFilter.end = 0;
       actualCategoryId.value = 0;
       actualSeasonsList.value = [];
       actualMaterialsList.value = [];
       actualColorsList.value = [];
-      $store.dispatch("products/loadListProduct", {
-        numberPage: 1,
-      });
+      $store
+        .dispatch("products/loadListProduct", {
+          numberPage: 1,
+        })
+        .then(() => {
+          localStorage.setItem(
+            "useFilters",
+            JSON.stringify({
+              minPrice: 0,
+              maxPrice: 0,
+              categoryId: 0,
+              materialIds: [],
+              colorIds: [],
+              seasonIds: [],
+            })
+          );
+        });
     };
 
     if (queryRouteType.value && categoryList.value.length) {
