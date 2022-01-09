@@ -88,10 +88,11 @@ export default defineComponent({
     };
 
     const toggleNumberPage = (numberPage: number) => {
+      const useFilters = JSON.parse(localStorage.getItem("useFilters") ?? "");
       $storeProducts
         .dispatch("products/loadListProduct", {
           numberPage,
-          filtersObject: {},
+          filtersObject: useFilters ? useFilters : {},
         })
         .then((res) => {
           actualPageNumber.value = res.pagination.page;
@@ -115,6 +116,13 @@ export default defineComponent({
       () => $storeProducts.state.products.totalNumberPage,
       (newValue) => {
         totalPage.value = newValue;
+      }
+    );
+
+    watch(
+      () => $storeProducts.state.products.listProducts,
+      () => {
+        actualPageNumber.value = 1;
       }
     );
 

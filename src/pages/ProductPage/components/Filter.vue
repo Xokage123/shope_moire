@@ -206,6 +206,8 @@ export default defineComponent({
         seasonIds: actualSeasonsList.value,
       };
 
+      localStorage.setItem("useFilters", JSON.stringify(filter));
+
       $store.dispatch("products/loadListProduct", {
         numberPage: 1,
         filtersObject: filter,
